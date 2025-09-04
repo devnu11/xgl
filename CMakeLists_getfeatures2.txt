@@ -1,0 +1,42 @@
+cmake_minimum_required(VERSION 3.10)
+project(GetFeatures2Simplification)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find required packages
+find_package(GTest REQUIRED)
+find_package(Threads REQUIRED)
+
+# Include directories
+include_directories(${GTEST_INCLUDE_DIRS})
+
+# Add executable for the test
+add_executable(test_getfeatures2
+    simplified_getfeatures2_implementations.cpp
+    test_getfeatures2_implementations.cpp
+)
+
+# Link libraries
+target_link_libraries(test_getfeatures2 
+    ${GTEST_LIBRARIES} 
+    Threads::Threads
+)
+
+# Enable testing
+enable_testing()
+add_test(NAME GetFeatures2Tests COMMAND test_getfeatures2)
+
+# Compiler flags for optimization and warnings
+if(MSVC)
+    target_compile_options(test_getfeatures2 PRIVATE /W4 /O2)
+else()
+    target_compile_options(test_getfeatures2 PRIVATE -Wall -Wextra -O2)
+endif()
+
+# Add a custom target to run benchmarks
+add_custom_target(benchmark
+    COMMAND test_getfeatures2 --gtest_filter="*Performance*"
+    DEPENDS test_getfeatures2
+    COMMENT "Running performance benchmarks"
+)
