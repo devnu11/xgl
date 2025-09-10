@@ -26,13 +26,28 @@
 cmake_minimum_required(VERSION 3.21)
 cmake_policy(SET CMP0091 NEW)
 
+# set(DISABLE_LLPC_VERSION_USES_LLVM ON CACHE BOOL "Disable LLPC_VERSION_USES_LLVM" FORCE)
+set(VKI_RAY_TRACING OFF CACHE BOOL "Enable Building RT Support" FORCE)
+set(LLPC_LLVM_SRC_PATH "${CMAKE_CURRENT_LIST_DIR}/../llvm-project/llvm" CACHE PATH "Path to LLVM source" FORCE)
+set(LLVM_INSTALL_UTILS OFF CACHE BOOL "Disable building llvm utils" FORCE)
+add_compile_definitions(DD_PLATFORM_WINDOWS_KM)
+
 # This part set before "project(XGL VERSION 1 LANGUAGES C CXX)".
 # In a system has both gcc and clang compiler.
-option(VKI_USE_CLANG "Build with clang?" OFF)
+option(VKI_USE_CLANG "Build with clang?" ON)
 if(UNIX AND VKI_USE_CLANG)
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
     include(XglCompilerOptions)
     xgl_use_clang_compiler()
+endif()
+
+# Configure flags for mingw target
+if(WIN32 AND VKI_USE_CLANG)
+    set(CMAKE_C_COMPILER "clang")
+    set(CMAKE_CXX_COMPILER "clang++")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -target x86_64-w64-mingw32")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -target x86_64-w64-mingw32")
 endif()
 
 ### CMake Includes ####################################################################################################
@@ -186,6 +201,8 @@ if(VKI_ENABLE_LIBCXX)
         message(WARNING "Not sure how to specify libc++ for this compiler")
     endif()
 endif()
+string(APPEND CMAKE_EXE_LINKER_FLAGS "-pthread")
+string(APPEND CMAKE_SHARED_LINKER_FLAGS "-pthread")
 
 ### GCOV source code coverage #########################################################################################
 # Temporary variables
