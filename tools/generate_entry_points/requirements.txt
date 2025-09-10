@@ -1,0 +1,17 @@
+# Python requirements for XGL entry point generator
+
+# No external dependencies required - uses only Python standard library:
+# - xml.etree.ElementTree for XML parsing
+# - string.Template for code templating
+# - pathlib for path handling
+# - argparse for command line parsing
+# - unittest for testing
+# - dataclasses for data structures
+# - enum for enumerations
+# - typing for type hints
+
+# For development/testing (optional):
+# black>=22.0.0        # Code formatting
+# pytest>=6.0.0       # Alternative test runner
+# mypy>=0.900         # Static type checking
+# coverage>=6.0.0      # Test coverage
