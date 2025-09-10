@@ -86,6 +86,9 @@ $parameters)
 
     VOID_FUNCTION_BODY = CodeTemplate("""
     Api$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
+    
+    GLOBAL_FUNCTION_BODY = CodeTemplate("""
+    return $method_name($method_params);""")
 
     ALLOCATOR_LOGIC = CodeTemplate("""const VkAllocationCallbacks* pAllocCB = $allocator_param ? $allocator_param : pDevice->VkInstance()->GetAllocCallbacks();""")
 
@@ -116,10 +119,15 @@ class TemplateEngine:
             return self.repo.DEVICE_FUNCTION_BODY.render(**context)
         elif function_type == 'instance':
             return self.repo.INSTANCE_FUNCTION_BODY.render(**context)
-        elif context.get('return_type') == 'void':
+        elif function_type == 'global':
+            return self.repo.GLOBAL_FUNCTION_BODY.render(**context)
+        elif context.get('return_type') == 'void' and context.get('handle_param'):
             return self.repo.VOID_FUNCTION_BODY.render(**context)
-        else:
+        elif context.get('handle_param'):
             return self.repo.SIMPLE_FUNCTION_BODY.render(**context)
+        else:
+            # Global function with no handle
+            return self.repo.GLOBAL_FUNCTION_BODY.render(**context)
     
     def render_allocator_logic(self, allocator_param: str) -> str:
         """Render allocator callback logic."""

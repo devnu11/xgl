@@ -57,8 +57,8 @@ class TypeMapper:
         """Check if function needs allocator callback logic."""
         return function_name in self.ALLOCATOR_FUNCTIONS
     
-    def get_required_includes(self, commands: list[Command]) -> list[str]:
-        """Get required includes for given commands."""
+    def get_required_includes(self, commands: list[Command]) -> str:
+        """Get required includes for given commands as formatted string."""
         includes = set()
         
         for command in commands:
@@ -75,32 +75,24 @@ class TypeMapper:
             '#include "include/vk_instance.h"'
         ]
         
-        return base_includes + sorted(list(includes))
+        all_includes = base_includes + sorted(list(includes))
+        return '\n'.join(all_includes)
     
     def format_parameter_list(self, parameters: list[Parameter]) -> str:
         """Format parameter list for function signature."""
         formatted_params = []
         
         for param in parameters:
-            param_str = "    "
-            
-            if param.is_const:
-                param_str += "const "
-            
+            param_str = " " * 4 # Indent
+            param_str += "const " if param.is_const else ""         
             param_str += param.type_name
-            
-            if param.is_pointer:
-                param_str += "*"
-            
-            # Pad type for alignment (XGL style)
-            while len(param_str) < 40:
-                param_str += " "
-            
+            param_str += "*" if param.is_pointer else ""            
+            param_str += " " * max(0, 48 - len(param_str))  # Pad type for alignment (XGL style)
             param_str += param.name
             
             formatted_params.append(param_str)
         
-        return ",\\n".join(formatted_params)
+        return ",\n".join(formatted_params)
     
     def format_method_parameters(self, parameters: list[Parameter], skip_first: bool = True) -> str:
         """Format parameters for method call (excluding handle parameter)."""

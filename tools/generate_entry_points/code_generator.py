@@ -53,13 +53,60 @@ class EntryPointGenerator:
         return groups
     
     def _get_object_type_from_command(self, command: Command) -> str:
-        """Determine object type from command."""
+        """Determine object type from command based on function name patterns."""
+        func_name = command.name.lower()
+        
+        # Map function patterns to existing file organization
+        object_mappings = {
+            'buffer': ['buffer'],
+            'buffer_view': ['bufferview'],  
+            'cmd_pool': ['commandpool'],
+            'debug_report': ['debugreportcallback'],
+            'debug_utils': ['debugutils'],
+            'deferred_operation': ['deferredoperation'],
+            'descriptor_buffer': ['descriptorbuffer'],
+            'descriptor_pool': ['descriptorpool'],
+            'descriptor_set': ['descriptorset'],
+            'descriptor_set_layout': ['descriptorsetlayout'],
+            'descriptor_update_template': ['descriptorupdatetemplate'],
+            'device': ['device', 'queue2', 'waitidle', 'getsemaphorecounter', 'waitsemaphores', 'signalsemaphore'],
+            'dispatch': ['getprocaddr'],
+            'event': ['event'],
+            'fence': ['fence'],
+            'framebuffer': ['framebuffer'],
+            'gpa_session': ['gpasession'],
+            'image': ['image', 'sparseimageformat'],
+            'image_view': ['imageview'],
+            'instance': ['instance', 'enumerate'],
+            'memory': ['memory', 'allocatememory', 'freememory', 'mapmemory', 'unmapmemory'],
+            'physical_device': ['physicaldevice', 'getphysicaldevice'],
+            'pipeline': ['pipeline', 'graphicspipeline', 'computepipeline', 'raytracingpipeline'],
+            'pipeline_cache': ['pipelinecache'],
+            'pipeline_layout': ['pipelinelayout'],
+            'private_data_slot': ['privatedataslot'],
+            'query': ['query'],
+            'queue': ['queue', 'submit', 'waitforidle', 'present'],
+            'render_pass': ['renderpass'],
+            'sampler': ['sampler'],
+            'sampler_ycbcr_conversion': ['samplerycbcr'],
+            'semaphore': ['semaphore'],
+            'shader': ['shader'],
+            'surface': ['surface'],
+            'swapchain': ['swapchain']
+        }
+        
+        # Find matching object type based on function name
+        for object_type, patterns in object_mappings.items():
+            if any(pattern in func_name for pattern in patterns):
+                return object_type
+        
+        # Fallback based on first handle parameter type
         first_param = command.get_first_handle_param()
         if first_param:
             return self.type_mapper.get_xgl_type(first_param.type_name).lower()
-        
-        # Fallback to command type
-        return command.command_type.value
+            
+        # Final fallback 
+        return 'device'
     
     def _generate_file_for_object_type(self, object_type: str, commands: List[Command]) -> None:
         """Generate entry point file for specific object type."""
@@ -84,8 +131,7 @@ class EntryPointGenerator:
     
     def _generate_includes(self, commands: List[Command]) -> str:
         """Generate include statements for commands."""
-        includes = self.type_mapper.get_required_includes(commands)
-        return '\\n'.join(includes)
+        return self.type_mapper.get_required_includes(commands)
     
     def _generate_functions(self, commands: List[Command]) -> str:
         """Generate all functions for given commands."""
@@ -95,7 +141,7 @@ class EntryPointGenerator:
             function_code = self._generate_single_function(command)
             functions.append(function_code)
         
-        return '\\n\\n'.join(functions)
+        return '\n\n'.join(functions)
     
     def _generate_single_function(self, command: Command) -> str:
         """Generate code for a single entry point function."""
@@ -145,9 +191,13 @@ class EntryPointGenerator:
             allocator_param = self.type_mapper.get_allocator_parameter(command.parameters)
             if allocator_param:
                 context['allocator_logic'] = self.template_engine.render_allocator_logic(allocator_param)
-                # Update method params to use pAllocCB
+                # Update method params to use pAllocCB  
                 original_params = self.type_mapper.format_method_parameters(command.parameters)
                 context['method_params'] = original_params.replace(allocator_param, 'pAllocCB')
+            else:
+                context['allocator_logic'] = ''
+        else:
+            context['allocator_logic'] = ''
         
         return context
     
