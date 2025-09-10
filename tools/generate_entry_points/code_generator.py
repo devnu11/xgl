@@ -212,12 +212,32 @@ class EntryPointGenerator:
             'method_params': self.type_mapper.format_method_parameters(command.parameters)
         }
         
+        # Add destroy function specific context
+        if command.name.startswith('vkDestroy') and len(command.parameters) >= 3:
+            context.update(self._build_destroy_context(command))
+        
         # Add function body
         if first_handle:
             context.update(self._build_handle_context(command, first_handle))
         
         function_body = self.template_engine.render_function_body(context)
         context['function_body'] = function_body
+        
+        return context
+    
+    def _build_destroy_context(self, command: Command) -> Dict[str, str]:
+        """Build context for destroy functions."""
+        # Destroy functions typically have: (device, handle, allocator)
+        device_param = command.parameters[0]  # First param is usually device
+        handle_param = command.parameters[1]  # Second param is the object being destroyed
+        allocator_param = command.parameters[2]  # Third param is allocator
+        
+        context = {
+            'device_param': device_param.name,
+            'handle_param': handle_param.name,
+            'allocator_param': allocator_param.name,
+            'object_type': self.type_mapper.get_xgl_type(handle_param.type_name)
+        }
         
         return context
     

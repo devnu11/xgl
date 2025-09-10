@@ -92,6 +92,15 @@ $parameters)
 
     ALLOCATOR_LOGIC = CodeTemplate("""const VkAllocationCallbacks* pAllocCB = $allocator_param ? $allocator_param : pDevice->VkInstance()->GetAllocCallbacks();""")
 
+    DESTROY_FUNCTION_BODY = CodeTemplate("""
+    if ($handle_param != VK_NULL_HANDLE)
+    {
+        Device*                      pDevice  = ApiDevice::ObjectFromHandle($device_param);
+        const VkAllocationCallbacks* pAllocCB = $allocator_param ? $allocator_param : pDevice->VkInstance()->GetAllocCallbacks();
+
+        $object_type::ObjectFromHandle($handle_param)->Destroy(pDevice, pAllocCB);
+    }""")
+
 
 class TemplateEngine:
     """Engine for rendering C++ code templates."""
@@ -114,8 +123,12 @@ class TemplateEngine:
     def render_function_body(self, context: Dict[str, Any]) -> str:
         """Render function body based on context."""
         function_type = context.get('function_type', 'simple')
+        function_name = context.get('function_name', '')
         
-        if function_type == 'device':
+        # Check if this is a destroy function
+        if function_name.startswith('vkDestroy') and context.get('return_type') == 'void':
+            return self.repo.DESTROY_FUNCTION_BODY.render(**context)
+        elif function_type == 'device':
             return self.repo.DEVICE_FUNCTION_BODY.render(**context)
         elif function_type == 'instance':
             return self.repo.INSTANCE_FUNCTION_BODY.render(**context)
