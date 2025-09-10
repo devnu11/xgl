@@ -1,2 +1,3 @@
 build
 *.pyc
+icd/api/entry/generated
