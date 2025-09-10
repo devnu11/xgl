@@ -32,13 +32,51 @@ class EntryPointGenerator:
         commands = self.parser.get_commands()
         self._log_info(f"Found {len(commands)} commands")
         
+        # Filter out NVIDIA/CUDA extensions
+        filtered_commands = self._filter_excluded_extensions(commands)
+        self._log_info(f"After filtering: {len(filtered_commands)} commands")
+        
         # Group commands by type for organized file generation
-        command_groups = self._group_commands_by_object_type(commands)
+        command_groups = self._group_commands_by_object_type(filtered_commands)
         
         for object_type, grouped_commands in command_groups.items():
             self._generate_file_for_object_type(object_type, grouped_commands)
         
         self._log_info("Entry point generation complete")
+    
+    def _filter_excluded_extensions(self, commands: Dict[str, Command]) -> Dict[str, Command]:
+        """Filter to only allow core and select vendor extensions."""
+        allowed_suffixes = [
+            'khr',      # Khronos extensions
+            'ext',      # Multi-vendor extensions
+            'amd',      # AMD extensions
+            'samsung',  # Samsung extensions
+            'android',  # Android extensions
+        ]
+        
+        filtered = {}
+        for name, command in commands.items():
+            func_name_lower = name.lower()
+            
+            # Always allow functions without vendor suffixes (core functions)
+            has_vendor_suffix = any(func_name_lower.endswith(suffix) for suffix in 
+                                   ['khr', 'ext', 'amd', 'nv', 'nvx', 'arm', 'qcom', 'samsung', 
+                                    'google', 'huawei', 'intel', 'msft', 'qnx', 'sec', 'img', 
+                                    'fuchsia', 'ggp', 'nn', 'mvk', 'android', 'win32', 'xcb', 
+                                    'xlib', 'wayland', 'directfb', 'ohos'])
+            
+            if not has_vendor_suffix:
+                # Core Vulkan function - always include
+                filtered[name] = command
+                continue
+            
+            # Check if function ends with allowed vendor suffix
+            if any(func_name_lower.endswith(suffix) for suffix in allowed_suffixes):
+                filtered[name] = command
+            else:
+                self._log_info(f"Filtering out non-allowed extension function: {name}")
+                
+        return filtered
     
     def _group_commands_by_object_type(self, commands: Dict[str, Command]) -> Dict[str, List[Command]]:
         """Group commands by their primary object type."""
@@ -56,57 +94,43 @@ class EntryPointGenerator:
         """Determine object type from command based on function name patterns."""
         func_name = command.name.lower()
         
-        # Map function patterns to existing file organization
-        object_mappings = {
-            'cmd_buffer': ['allocatecommandbuffers', 'begincommandbuffer', 'endcommandbuffer', 'resetcommandbuffer'],
-            'cmd_pool': ['commandpool'],
-            'buffer': ['buffer'],
-            'buffer_view': ['bufferview'],
-            'debug_report': ['debugreportcallback'],
-            'debug_utils': ['debugutils'],
-            'deferred_operation': ['deferredoperation'],
-            'descriptor_buffer': ['descriptorbuffer'],
-            'descriptor_pool': ['descriptorpool'],
-            'descriptor_set': ['descriptorset'],
-            'descriptor_set_layout': ['descriptorsetlayout'],
-            'descriptor_update_template': ['descriptorupdatetemplate'],
-            'device': ['device', 'queue2', 'waitidle', 'getsemaphorecounter', 'waitsemaphores', 'signalsemaphore'],
-            'dispatch': ['getprocaddr'],
-            'event': ['event'],
-            'fence': ['fence'],
-            'framebuffer': ['framebuffer'],
-            'gpa_session': ['gpasession'],
-            'image': ['image', 'sparseimageformat'],
-            'image_view': ['imageview'],
-            'instance': ['instance', 'enumerate'],
-            'memory': ['memory', 'allocatememory', 'freememory', 'mapmemory', 'unmapmemory'],
-            'physical_device': ['physicaldevice', 'getphysicaldevice'],
-            'pipeline': ['pipeline', 'graphicspipeline', 'computepipeline', 'raytracingpipeline'],
-            'pipeline_cache': ['pipelinecache'],
-            'pipeline_layout': ['pipelinelayout'],
-            'private_data_slot': ['privatedataslot'],
-            'query': ['query'],
-            'queue': ['queue', 'submit', 'waitforidle', 'present'],
-            'render_pass': ['renderpass'],
-            'sampler': ['sampler'],
-            'sampler_ycbcr_conversion': ['samplerycbcr'],
-            'semaphore': ['semaphore'],
-            'shader': ['shader'],
-            'surface': ['surface'],
-            'swapchain': ['swapchain']
-        }
+        # First priority: Handle destroy functions - categorize by object being destroyed
+        if 'destroy' in func_name and len(command.parameters) >= 2:
+            # For destroy functions, use the second parameter (the object being destroyed)
+            destroy_param = command.parameters[1]  # Skip device parameter
+            if hasattr(destroy_param, 'type_name'):
+                xgl_type = self.type_mapper.get_xgl_type(destroy_param.type_name)
+                return self._pascal_to_snake_case(xgl_type)
         
-        # Find matching object type based on function name
-        for object_type, patterns in object_mappings.items():
-            if any(pattern in func_name for pattern in patterns):
-                return object_type
-        
-        # Fallback based on first handle parameter type
+        # Second priority: Use first handle parameter (systematic approach)
         first_param = command.get_first_handle_param()
         if first_param:
             xgl_type = self.type_mapper.get_xgl_type(first_param.type_name)
-            # Convert PascalCase to snake_case for file naming
-            return self._pascal_to_snake_case(xgl_type)
+            object_type = self._pascal_to_snake_case(xgl_type)
+            
+            # Special case overrides for known patterns that need different grouping
+            special_cases = {
+                'cmd_buffer': ['allocatecommandbuffers', 'begincommandbuffer', 'endcommandbuffer', 'resetcommandbuffer'],
+                'gpa_session': ['gpasession'],
+                'descriptor_set_layout': ['descriptorsetlayout'],
+            }
+            
+            # Check if this function matches any special case patterns
+            for special_type, patterns in special_cases.items():
+                if any(pattern in func_name for pattern in patterns):
+                    return special_type
+            
+            return object_type
+            
+        # Third priority: Pattern matching for functions without handle parameters
+        pattern_mappings = {
+            'instance': ['instance', 'enumerate'],
+            'dispatch': ['getprocaddr'],
+        }
+        
+        for object_type, patterns in pattern_mappings.items():
+            if any(pattern in func_name for pattern in patterns):
+                return object_type
             
         # Final fallback 
         return 'device'
@@ -114,6 +138,19 @@ class EntryPointGenerator:
     def _pascal_to_snake_case(self, pascal_str: str) -> str:
         """Convert PascalCase to snake_case."""
         import re
+        
+        # Strip 'Vk' prefix if present (for unmapped Vulkan types)
+        if pascal_str.startswith('Vk'):
+            pascal_str = pascal_str[2:]
+        
+        # Handle common extension suffixes as single words
+        extension_suffixes = ['KHR', 'EXT', 'AMD', 'SAMSUNG']
+        for suffix in extension_suffixes:
+            if pascal_str.endswith(suffix):
+                base = pascal_str[:-len(suffix)]
+                # Convert base to snake_case and append suffix
+                base_snake = re.sub(r'(?<!^)([A-Z])', r'_\1', base).lower()
+                return f"{base_snake}_{suffix.lower()}"
         
         # Insert underscores before capital letters (except the first one)
         snake_str = re.sub(r'(?<!^)([A-Z])', r'_\1', pascal_str)
