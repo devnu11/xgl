@@ -43,6 +43,7 @@
 #include "palDevice.h"
 #include "palEventDefs.h"
 #include "palGpuMemory.h"
+#include "entry/entry_vk_descriptor_pool.cpp"
 
 namespace vk
 {
@@ -1498,64 +1499,5 @@ PFN_vkAllocateDescriptorSets DescriptorPool::GetAllocateDescriptorSetsFunc(
     return pFunc;
 }
 
-namespace entry
-{
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorPool(
-    VkDevice                                    device,
-    const VkDescriptorPoolCreateInfo*           pCreateInfo,
-    const VkAllocationCallbacks*                pAllocator,
-    VkDescriptorPool*                           pDescriptorPool)
-{
-    const Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    return pDevice->GetEntryPoints().vkCreateDescriptorPool(device, pCreateInfo, pAllocator, pDescriptorPool);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkFreeDescriptorSets(
-    VkDevice                                    device,
-    VkDescriptorPool                            descriptorPool,
-    uint32_t                                    descriptorSetCount,
-    const VkDescriptorSet*                      pDescriptorSets)
-{
-    const Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    return pDevice->GetEntryPoints().vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, pDescriptorSets);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkResetDescriptorPool(
-    VkDevice                                    device,
-    VkDescriptorPool                            descriptorPool,
-    VkDescriptorPoolResetFlags                  flags)
-{
-    const Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    return pDevice->GetEntryPoints().vkResetDescriptorPool(device, descriptorPool, flags);
-}
-
-VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorPool(
-    VkDevice                                    device,
-    VkDescriptorPool                            descriptorPool,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (descriptorPool != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        DescriptorPool::ObjectFromHandle(descriptorPool)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
-    VkDevice                                    device,
-    const VkDescriptorSetAllocateInfo*          pAllocateInfo,
-    VkDescriptorSet*                            pDescriptorSets)
-{
-    const Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    return pDevice->GetEntryPoints().vkAllocateDescriptorSets(device, pAllocateInfo, pDescriptorSets);
-}
-
-} // namespace entry
 
 } // namespace vk

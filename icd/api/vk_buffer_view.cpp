@@ -30,6 +30,7 @@
 #include "include/vk_utils.h"
 
 #include "palFormatInfo.h"
+#include "entry/entry_vk_buffer_view.cpp"
 
 namespace vk
 {
@@ -174,25 +175,5 @@ VkResult BufferView::Destroy(
     return VK_SUCCESS;
 }
 
-namespace entry
-{
-
-// =====================================================================================================================
-
-VKAPI_ATTR void VKAPI_CALL vkDestroyBufferView(
-    VkDevice                                    device,
-    VkBufferView                                bufferView,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (bufferView != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        BufferView::ObjectFromHandle(bufferView)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-} // namespace entry
 
 } // namespace vk

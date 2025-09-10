@@ -165,6 +165,43 @@ target_sources(xgl PRIVATE
     api/utils/json_reader.cpp
     api/utils/json_writer.cpp
     api/icd_main.cpp
+    # Entry namespace files
+    api/entry/entry_entry.cpp
+    api/entry/entry_vk_buffer.cpp
+    api/entry/entry_vk_buffer_view.cpp
+    api/entry/entry_vk_cmd_pool.cpp
+    api/entry/entry_vk_debug_report.cpp
+    api/entry/entry_vk_debug_utils.cpp
+    api/entry/entry_vk_deferred_operation.cpp
+    api/entry/entry_vk_descriptor_buffer.cpp
+    api/entry/entry_vk_descriptor_pool.cpp
+    api/entry/entry_vk_descriptor_set.cpp
+    api/entry/entry_vk_descriptor_set_layout.cpp
+    api/entry/entry_vk_descriptor_update_template.cpp
+    api/entry/entry_vk_device.cpp
+    api/entry/entry_vk_dispatch.cpp
+    api/entry/entry_vk_event.cpp
+    api/entry/entry_vk_fence.cpp
+    api/entry/entry_vk_framebuffer.cpp
+    api/entry/entry_vk_gpa_session.cpp
+    api/entry/entry_vk_image.cpp
+    api/entry/entry_vk_image_view.cpp
+    api/entry/entry_vk_instance.cpp
+    api/entry/entry_vk_memory.cpp
+    api/entry/entry_vk_physical_device.cpp
+    api/entry/entry_vk_pipeline.cpp
+    api/entry/entry_vk_pipeline_cache.cpp
+    api/entry/entry_vk_pipeline_layout.cpp
+    api/entry/entry_vk_private_data_slot.cpp
+    api/entry/entry_vk_query.cpp
+    api/entry/entry_vk_queue.cpp
+    api/entry/entry_vk_render_pass.cpp
+    api/entry/entry_vk_sampler.cpp
+    api/entry/entry_vk_sampler_ycbcr_conversion.cpp
+    api/entry/entry_vk_semaphore.cpp
+    api/entry/entry_vk_shader.cpp
+    api/entry/entry_vk_surface.cpp
+    api/entry/entry_vk_swapchain.cpp
 )
 
 #if VKI_RAY_TRACING

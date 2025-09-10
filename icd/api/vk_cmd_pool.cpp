@@ -41,6 +41,7 @@
 #include "palVectorImpl.h"
 
 #include "devmode/devmode_mgr.h"
+#include "entry/entry_vk_cmd_pool.cpp"
 
 namespace vk
 {
@@ -381,43 +382,5 @@ void CmdPool::UnmarkCmdBufBegun(
  ***********************************************************************************************************************
  */
 
-namespace entry
-{
-
-// =====================================================================================================================
-
-VKAPI_ATTR void VKAPI_CALL vkDestroyCommandPool(
-    VkDevice                                    device,
-    VkCommandPool                               commandPool,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (commandPool != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        CmdPool::ObjectFromHandle(commandPool)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandPool(
-    VkDevice                                    device,
-    VkCommandPool                               commandPool,
-    VkCommandPoolResetFlags                     flags)
-{
-    return CmdPool::ObjectFromHandle(commandPool)->Reset(flags);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkTrimCommandPool(
-    VkDevice                                    device,
-    VkCommandPool                               commandPool,
-    VkCommandPoolTrimFlags                      flags)
-{
-    CmdPool::ObjectFromHandle(commandPool)->Trim();
-}
-
-} // namespace entry
 
 } // namespace vk

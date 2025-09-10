@@ -58,6 +58,7 @@
 #include "palInlineFuncs.h"
 
 #include <new>
+#include "entry/entry_vk_instance.cpp"
 
 namespace vk
 {
@@ -1426,78 +1427,6 @@ void Instance::CallExternalMessengers(
     m_logCallbackInternalExternalMutex.Unlock();
 }
 
-namespace entry
-{
-
-VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceVersion(
-    uint32_t*                                   pApiVersion)
-{
-    return Instance::EnumerateVersion(pApiVersion);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateInstance(
-    const VkInstanceCreateInfo*                 pCreateInfo,
-    const VkAllocationCallbacks*                pAllocator,
-    VkInstance*                                 pInstance)
-{
-    VkResult result = Instance::Create(pCreateInfo, pAllocator, pInstance);
-
-    return result;
-}
-
-VKAPI_ATTR void VKAPI_CALL vkDestroyInstance(
-    VkInstance                                  instance,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (instance != VK_NULL_HANDLE)
-    {
-        Instance::ObjectFromHandle(instance)->Destroy();
-    }
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDevices(
-    VkInstance                                  instance,
-    uint32_t*                                   pPhysicalDeviceCount,
-    VkPhysicalDevice*                           pPhysicalDevices)
-{
-    return Instance::ObjectFromHandle(instance)->EnumeratePhysicalDevices(
-        pPhysicalDeviceCount, pPhysicalDevices);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(
-    VkInstance                                  instance,
-    uint32_t*                                   pPhysicalDeviceGroupCount,
-    VkPhysicalDeviceGroupProperties*            pPhysicalDeviceGroupProperties)
-{
-    return Instance::ObjectFromHandle(instance)->EnumeratePhysicalDeviceGroups(
-        pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceExtensionProperties(
-    const char*                                 pLayerName,
-    uint32_t*                                   pPropertyCount,
-    VkExtensionProperties*                      pProperties)
-{
-    return Instance::EnumerateExtensionProperties(
-        pLayerName,
-        pPropertyCount,
-        pProperties);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceLayerProperties(
-    uint32_t*                                   pPropertyCount,
-    VkLayerProperties*                          pProperties)
-{
-    // We do not export any internal layers
-    if (pProperties == nullptr)
-    {
-        *pPropertyCount = 0;
-    }
-
-    return VK_SUCCESS;
-}
-
-} // namespace entry
 
 } // namespace vk
 

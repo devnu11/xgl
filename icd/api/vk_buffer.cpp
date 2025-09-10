@@ -36,6 +36,7 @@
 #include "palEventDefs.h"
 #include "palQueue.h"
 #include "palInlineFuncs.h"
+#include "entry/entry_vk_buffer.cpp"
 
 namespace vk
 {
@@ -704,98 +705,5 @@ void Buffer::HandleExtensionStructs(
 
 }
 
-namespace entry
-{
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyBuffer(
-    VkDevice                                    device,
-    VkBuffer                                    buffer,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (buffer != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        Buffer::ObjectFromHandle(buffer)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkBindBufferMemory(
-    VkDevice                                    device,
-    VkBuffer                                    buffer,
-    VkDeviceMemory                              memory,
-    VkDeviceSize                                memoryOffset)
-{
-    const Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    Buffer::ObjectFromHandle(buffer)->BindMemory(pDevice, memory, memoryOffset, nullptr);
-
-    return VK_SUCCESS;
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements(
-    VkDevice                                    device,
-    VkBuffer                                    buffer,
-    VkMemoryRequirements*                       pMemoryRequirements)
-{
-    const Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    Buffer::ObjectFromHandle(buffer)->GetMemoryRequirements(pDevice, pMemoryRequirements);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2(
-    VkDevice                                    device,
-    const VkBufferMemoryRequirementsInfo2*      pInfo,
-    VkMemoryRequirements2*                      pMemoryRequirements)
-{
-    const Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    Buffer* pBuffer = Buffer::ObjectFromHandle(pInfo->buffer);
-    VkMemoryRequirements* pRequirements = &pMemoryRequirements->memoryRequirements;
-    pBuffer->GetMemoryRequirements(pDevice, pRequirements);
-
-    VkMemoryDedicatedRequirements* pMemDedicatedRequirements =
-        static_cast<VkMemoryDedicatedRequirements*>(pMemoryRequirements->pNext);
-
-    if ((pMemDedicatedRequirements != nullptr) &&
-        (pMemDedicatedRequirements->sType == VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS))
-    {
-        pMemDedicatedRequirements->prefersDedicatedAllocation  = pBuffer->DedicatedMemoryRequired();
-        pMemDedicatedRequirements->requiresDedicatedAllocation = pBuffer->DedicatedMemoryRequired();
-    }
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkDeviceAddress VKAPI_CALL vkGetBufferDeviceAddress(
-    VkDevice                                    device,
-    const VkBufferDeviceAddressInfo* const      pInfo)
-{
-    Buffer* const pBuffer = Buffer::ObjectFromHandle(pInfo->buffer);
-
-    return pBuffer->GpuVirtAddr(DefaultDeviceIndex);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR uint64_t VKAPI_CALL vkGetBufferOpaqueCaptureAddress(
-    VkDevice                                    device,
-    const VkBufferDeviceAddressInfo*            pInfo)
-{
-    Buffer* const pBuffer = Buffer::ObjectFromHandle(pInfo->buffer);
-
-    uint64_t gpuVirtAddr = 0;
-
-    if (pBuffer->IsSparse())
-    {
-        gpuVirtAddr = pBuffer->GpuVirtAddr(DefaultDeviceIndex);
-    }
-
-    return gpuVirtAddr;
-}
-
-} // namespace entry
 
 } // namespace vk

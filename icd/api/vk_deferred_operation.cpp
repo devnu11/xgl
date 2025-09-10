@@ -32,6 +32,7 @@
 #include "palFormatInfo.h"
 
 #include <climits>
+#include "entry/entry_vk_deferred_operation.cpp"
 
 namespace vk
 {
@@ -214,51 +215,4 @@ void DeferredHostOperation::ExecuteWorkload(DeferredWorkload* pWorkload)
     }
 }
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyDeferredOperationKHR(
-    VkDevice                                    device,
-    VkDeferredOperationKHR                      operation,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    Device*                      pDevice    = ApiDevice::ObjectFromHandle(device);
-    DeferredHostOperation*       pOperation = DeferredHostOperation::ObjectFromHandle(operation);
-    const VkAllocationCallbacks* pAllocCB   = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-    pOperation->Destroy(pDevice, pAllocCB);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkGetDeferredOperationResultKHR(
-    VkDevice                                    device,
-    VkDeferredOperationKHR                      operation)
-{
-    DeferredHostOperation* pOperation = DeferredHostOperation::ObjectFromHandle(operation);
-
-    return pOperation->GetOperationResult(ApiDevice::ObjectFromHandle(device));
-}
-
-// =====================================================================================================================
-VKAPI_ATTR uint32_t VKAPI_CALL vkGetDeferredOperationMaxConcurrencyKHR(
-    VkDevice                                    device,
-    VkDeferredOperationKHR                      operation)
-{
-    DeferredHostOperation* pOperation = DeferredHostOperation::ObjectFromHandle(operation);
-
-    return pOperation->GetMaxConcurrency(ApiDevice::ObjectFromHandle(device));
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkDeferredOperationJoinKHR(
-    VkDevice                                    device,
-    VkDeferredOperationKHR                      operation)
-{
-    DeferredHostOperation* pOperation = DeferredHostOperation::ObjectFromHandle(operation);
-
-    return pOperation->Join(ApiDevice::ObjectFromHandle(device));
-}
-
-} // namespace entry
 } // namespace vk

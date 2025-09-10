@@ -36,6 +36,7 @@
 #include "include/vk_memory.h"
 
 #include "palGpuEvent.h"
+#include "entry/entry_vk_event.cpp"
 
 namespace vk
 {
@@ -284,44 +285,5 @@ VkResult Event::Destroy(
  ***********************************************************************************************************************
  */
 
-namespace entry
-{
-
-VKAPI_ATTR void VKAPI_CALL vkDestroyEvent(
-    VkDevice                                    device,
-    VkEvent                                     event,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (event != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        Event::ObjectFromHandle(event)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkGetEventStatus(
-    VkDevice                                    device,
-    VkEvent                                     event)
-{
-    return Event::ObjectFromHandle(event)->GetStatus();
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkSetEvent(
-    VkDevice                                    device,
-    VkEvent                                     event)
-{
-    return Event::ObjectFromHandle(event)->Set();
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkResetEvent(
-    VkDevice                                    device,
-    VkEvent                                     event)
-{
-    return Event::ObjectFromHandle(event)->Reset();
-}
-
-} // namespace entry
 
 } // namespace vk

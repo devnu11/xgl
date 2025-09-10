@@ -31,6 +31,7 @@
 #include "vk_instance.h"
 #include "vk_physical_device_manager.h"
 #include "vk_surface.h"
+#include "entry/entry_vk_surface.cpp"
 
 namespace vk
 {
@@ -186,69 +187,4 @@ void Surface::Destroy(
     pInstance->FreeMem(reinterpret_cast<void*>(this));
 }
 
-namespace entry
-{
-
-#if defined(__unix__)
-#ifdef VK_USE_PLATFORM_XCB_KHR
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateXcbSurfaceKHR(
-    VkInstance                          instance,
-    const VkXcbSurfaceCreateInfoKHR*    pCreateInfo,
-    const VkAllocationCallbacks*        pAllocator,
-    VkSurfaceKHR*                       pSurface)
-{
-    return Surface::Create(Instance::ObjectFromHandle(instance),
-        reinterpret_cast<const VkStructHeader*>(pCreateInfo), pAllocator, pSurface);
-}
-#endif
-
-#ifdef VK_USE_PLATFORM_XLIB_KHR
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateXlibSurfaceKHR(
-    VkInstance                          instance,
-    const VkXlibSurfaceCreateInfoKHR*   pCreateInfo,
-    const VkAllocationCallbacks*        pAllocator,
-    VkSurfaceKHR*                       pSurface)
-{
-    return Surface::Create(Instance::ObjectFromHandle(instance),
-        reinterpret_cast<const VkStructHeader*>(pCreateInfo), pAllocator, pSurface);
-}
-#endif
-
-// =====================================================================================================================
-#ifdef VK_USE_PLATFORM_WAYLAND_KHR
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateWaylandSurfaceKHR(
-    VkInstance                          instance,
-    const VkWaylandSurfaceCreateInfoKHR*   pCreateInfo,
-    const VkAllocationCallbacks*        pAllocator,
-    VkSurfaceKHR*                       pSurface)
-{
-    return Surface::Create(Instance::ObjectFromHandle(instance),
-        reinterpret_cast<const VkStructHeader*>(pCreateInfo), pAllocator, pSurface);
-}
-#endif
-#endif
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateDisplayPlaneSurfaceKHR(
-    VkInstance                                  instance,
-    const VkDisplaySurfaceCreateInfoKHR*        pCreateInfo,
-    const VkAllocationCallbacks*                pAllocator,
-    VkSurfaceKHR*                               pSurface)
-{
-    return Surface::Create(Instance::ObjectFromHandle(instance),
-        reinterpret_cast<const VkStructHeader*>(pCreateInfo), pAllocator, pSurface);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroySurfaceKHR(
-    VkInstance                                   instance,
-    VkSurfaceKHR                                 surface,
-    const VkAllocationCallbacks*                 pAllocator)
-{
-    Surface::ObjectFromHandle(surface)->Destroy(Instance::ObjectFromHandle(instance), pAllocator);
-}
-
-} // namespace entry
 } // namespace vk

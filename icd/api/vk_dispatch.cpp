@@ -66,6 +66,7 @@
 #include "include/vk_debug_report.h"
 
 #include <cstring>
+#include "entry/entry_vk_dispatch.cpp"
 
 namespace vk
 {
@@ -1032,41 +1033,6 @@ PFN_vkVoidFunction DispatchTable::GetPhysicalDeviceEntryPoint(const char* pName)
     return pFunc;
 }
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vkGetInstanceProcAddr(
-    VkInstance                                  instance,
-    const char*                                 pName)
-{
-    if (instance == VK_NULL_HANDLE)
-    {
-        return g_GlobalDispatchTable.GetEntryPoint(pName);
-    }
-    else
-    {
-        return Instance::ObjectFromHandle(instance)->GetDispatchTable().GetEntryPoint(pName);
-    }
-}
-
-// =====================================================================================================================
-VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vkGetPhysicalDeviceProcAddr(
-    VkInstance                                  instance,
-    const char*                                 pName)
-{
-    return Instance::ObjectFromHandle(instance)->GetDispatchTable().GetPhysicalDeviceEntryPoint(pName);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vkGetDeviceProcAddr(
-    VkDevice                                    device,
-    const char*                                 pName)
-{
-    return ApiDevice::ObjectFromHandle(device)->GetDispatchTable().GetEntryPoint(pName);
-}
-
-} // namespace entry
 
 } // namespace vk
 

@@ -26,6 +26,7 @@
 #include "include/vk_debug_report.h"
 #include "include/vk_instance.h"
 #include "palDbgPrint.h"
+#include "entry/entry_vk_debug_report.cpp"
 
 namespace vk
 {
@@ -107,48 +108,5 @@ void* DebugReportCallback::GetUserData()
     return m_createInfo.pUserData;
 }
 
-namespace entry
-{
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugReportCallbackEXT(
-    VkInstance                                instance,
-    const VkDebugReportCallbackCreateInfoEXT* pCreateInfo,
-    const VkAllocationCallbacks*              pAllocator,
-    VkDebugReportCallbackEXT*                 pCallback)
-{
-    Instance* pInstance = Instance::ObjectFromHandle(instance);
-
-    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pInstance->GetAllocCallbacks();
-
-    return DebugReportCallback::Create(pInstance, pCreateInfo, pAllocCB, pCallback);
-}
-
-VKAPI_ATTR void VKAPI_CALL vkDestroyDebugReportCallbackEXT(
-    VkInstance                                instance,
-    VkDebugReportCallbackEXT                  callback,
-    const VkAllocationCallbacks*              pAllocator)
-{
-    Instance* pInstance = Instance::ObjectFromHandle(instance);
-
-    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pInstance->GetAllocCallbacks();
-
-    DebugReportCallback::ObjectFromHandle(callback)->Destroy(pInstance, pAllocCB);
-}
-
-VKAPI_ATTR void VKAPI_CALL vkDebugReportMessageEXT(
-    VkInstance                                instance,
-    VkDebugReportFlagsEXT                     flags,
-    VkDebugReportObjectTypeEXT                objectType,
-    uint64_t                                  object,
-    size_t                                    location,
-    int32_t                                   messageCode,
-    const char*                               pLayerPrefix,
-    const char*                               pMessage)
-{
-    Instance* pInstance = Instance::ObjectFromHandle(instance);
-
-    pInstance->CallExternalCallbacks(flags, objectType, object, location, messageCode, pLayerPrefix, pMessage);
-}
-
-} // namespace entry
 
 } // namespace vk

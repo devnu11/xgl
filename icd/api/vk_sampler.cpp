@@ -31,6 +31,7 @@
 
 #include "palDevice.h"
 #include "palMetroHash.h"
+#include "entry/entry_vk_sampler.cpp"
 
 namespace vk
 {
@@ -412,23 +413,5 @@ void Sampler::HandleExtensionStructs(
     }
 }
 
-namespace entry
-{
-
-VKAPI_ATTR void VKAPI_CALL vkDestroySampler(
-    VkDevice                                    device,
-    VkSampler                                   sampler,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (sampler != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        Sampler::ObjectFromHandle(sampler)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-} // namespace entry
 
 } // namespace vk

@@ -32,6 +32,7 @@
 #include "palColorTargetView.h"
 #include "palDepthStencilView.h"
 #include "palFormatInfo.h"
+#include "entry/entry_vk_image_view.cpp"
 
 namespace vk
 {
@@ -865,24 +866,5 @@ VkResult ImageView::Destroy(
     return VK_SUCCESS;
 }
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyImageView(
-    VkDevice                                    device,
-    VkImageView                                 imageView,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (imageView != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        ImageView::ObjectFromHandle(imageView)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-} // namespace entry
 
 } // namespace vk

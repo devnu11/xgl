@@ -34,6 +34,7 @@
 #include "palVectorImpl.h"
 
 #include "palMetroHash.h"
+#include "entry/entry_vk_descriptor_set_layout.cpp"
 
 namespace vk
 {
@@ -961,23 +962,5 @@ VkResult DescriptorSetLayout::Destroy(
     return VK_SUCCESS;
 }
 
-namespace entry
-{
-
-VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorSetLayout(
-    VkDevice                                    device,
-    VkDescriptorSetLayout                       descriptorSetLayout,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (descriptorSetLayout != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        DescriptorSetLayout::ObjectFromHandle(descriptorSetLayout)->Destroy(pDevice, pAllocCB, true);
-    }
-}
-
-} // namespace entry
 
 } // namespace vk

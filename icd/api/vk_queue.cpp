@@ -55,6 +55,7 @@
 #include "palQueue.h"
 #include "palVectorImpl.h"
 #include "palListImpl.h"
+#include "entry/entry_vk_queue.cpp"
 
 namespace vk
 {
@@ -2942,78 +2943,5 @@ void Queue::DevModeFrameBoundary(
  ***********************************************************************************************************************
  */
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(
-    VkQueue                                     queue,
-    uint32_t                                    submitCount,
-    const VkSubmitInfo*                         pSubmits,
-    VkFence                                     fence)
-{
-     return ApiQueue::ObjectFromHandle(queue)->Submit<VkSubmitInfo>(
-        submitCount,
-        pSubmits,
-        fence);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit2(
-    VkQueue                                     queue,
-    uint32_t                                    submitCount,
-    const VkSubmitInfo2KHR*                     pSubmits,
-    VkFence                                     fence)
-{
-    return ApiQueue::ObjectFromHandle(queue)->Submit<VkSubmitInfo2KHR>(
-        submitCount,
-        pSubmits,
-        fence);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkQueueWaitIdle(
-    VkQueue                                     queue)
-{
-    return ApiQueue::ObjectFromHandle(queue)->WaitIdle();
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkQueueBindSparse(
-    VkQueue                                     queue,
-    uint32_t                                    bindInfoCount,
-    const VkBindSparseInfo*                     pBindInfo,
-    VkFence                                     fence)
-{
-    return ApiQueue::ObjectFromHandle(queue)->BindSparse(bindInfoCount, pBindInfo, fence);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkQueuePresentKHR(
-    VkQueue                                      queue,
-    const VkPresentInfoKHR*                      pPresentInfo)
-{
-    return ApiQueue::ObjectFromHandle(queue)->Present(pPresentInfo);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkQueueBeginDebugUtilsLabelEXT(
-    VkQueue                                     queue,
-    const VkDebugUtilsLabelEXT*                 pLabelInfo)
-{
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkQueueEndDebugUtilsLabelEXT(
-    VkQueue                                     queue)
-{
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkQueueInsertDebugUtilsLabelEXT(
-    VkQueue                                     queue,
-    const VkDebugUtilsLabelEXT*                 pLabelInfo)
-{
-    ApiQueue::ObjectFromHandle(queue)->InsertDebugUtilsLabel(pLabelInfo);
-}
-
-} // namespace entry
 
 } // namespace vk

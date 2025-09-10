@@ -35,6 +35,7 @@
 #include "palColorTargetView.h"
 #include "palDepthStencilView.h"
 #include "palVectorImpl.h"
+#include "entry/entry_vk_framebuffer.cpp"
 
 namespace vk
 {
@@ -288,24 +289,5 @@ void Framebuffer::SetSubresRanges(
         pAttachment->subresRange[0].startSubres.mipLevel);
 }
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyFramebuffer(
-    VkDevice                                    device,
-    VkFramebuffer                               framebuffer,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (framebuffer != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        Framebuffer::ObjectFromHandle(framebuffer)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-} // namespace entry
 
 } // namespace vk

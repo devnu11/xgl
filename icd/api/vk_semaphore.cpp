@@ -29,6 +29,7 @@
 #include "include/vk_semaphore.h"
 
 #include "palQueueSemaphore.h"
+#include "entry/entry_vk_semaphore.cpp"
 
 namespace vk
 {
@@ -483,42 +484,5 @@ VkResult Semaphore::SignalSemaphoreValue(
     return PalToVkResult(palResult);
 }
 
-namespace entry
-{
-VKAPI_ATTR void VKAPI_CALL vkDestroySemaphore(
-    VkDevice                                    device,
-    VkSemaphore                                 semaphore,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (semaphore != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        Semaphore::ObjectFromHandle(semaphore)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-#if defined(__unix__)
-VKAPI_ATTR VkResult VKAPI_CALL vkGetSemaphoreFdKHR(
-    VkDevice                                    device,
-    const VkSemaphoreGetFdInfoKHR*              pGetFdInfo,
-    int*                                        pFd)
-{
-    Pal::OsExternalHandle handle = 0;
-
-    VkResult result = Semaphore::ObjectFromHandle(pGetFdInfo->semaphore)->GetShareHandle(
-        ApiDevice::ObjectFromHandle(device),
-        pGetFdInfo->pNext,
-        pGetFdInfo->handleType,
-        &handle);
-
-    *pFd = static_cast<int>(handle);
-
-    return result;
-}
-#endif
-
-} // namespace entry
 
 } // namespace vk

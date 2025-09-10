@@ -34,6 +34,7 @@
 #include "include/vk_gpa_session.h"
 
 #include "palLib.h"
+#include "entry/entry_vk_gpa_session.cpp"
 
 namespace vk
 {
@@ -324,118 +325,5 @@ void GpaSession::CmdCopyResults(
  ***********************************************************************************************************************
  */
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateGpaSessionAMD(
-    VkDevice                                    device,
-    const VkGpaSessionCreateInfoAMD*            pCreateInfo,
-    const VkAllocationCallbacks*                pAllocator,
-    VkGpaSessionAMD*                            pGpaSession)
-{
-    VkResult result = GpaSession::Create(ApiDevice::ObjectFromHandle(device), pCreateInfo, pAllocator, pGpaSession);
-
-    return result;
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyGpaSessionAMD(
-    VkDevice                                    device,
-    VkGpaSessionAMD                             gpaSession,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    GpaSession::ObjectFromHandle(gpaSession)->Destroy(pAllocator);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCmdBeginGpaSessionAMD(
-    VkCommandBuffer                             commandBuffer,
-    VkGpaSessionAMD                             gpaSession)
-{
-    VkResult result = GpaSession::ObjectFromHandle(gpaSession)->CmdBegin(ApiCmdBuffer::ObjectFromHandle(commandBuffer));
-
-    return result;
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCmdEndGpaSessionAMD(
-    VkCommandBuffer                             commandBuffer,
-    VkGpaSessionAMD                             gpaSession)
-{
-    VkResult result = GpaSession::ObjectFromHandle(gpaSession)->CmdEnd(ApiCmdBuffer::ObjectFromHandle(commandBuffer));
-
-    return result;
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCmdBeginGpaSampleAMD(
-    VkCommandBuffer                             commandBuffer,
-    VkGpaSessionAMD                             gpaSession,
-    const VkGpaSampleBeginInfoAMD*              pGpaSampleBeginInfo,
-    uint32_t*                                   pSampleID)
-{
-    VkResult result = GpaSession::ObjectFromHandle(gpaSession)->CmdBeginSample(
-        ApiCmdBuffer::ObjectFromHandle(commandBuffer),
-        pGpaSampleBeginInfo,
-        pSampleID);
-
-    return result;
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkCmdEndGpaSampleAMD(
-    VkCommandBuffer                             commandBuffer,
-    VkGpaSessionAMD                             gpaSession,
-    uint32_t                                    sampleID)
-{
-    GpaSession::ObjectFromHandle(gpaSession)->CmdEndSample(ApiCmdBuffer::ObjectFromHandle(commandBuffer), sampleID);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkGetGpaSessionStatusAMD(
-    VkDevice                                    device,
-    VkGpaSessionAMD                             gpaSession)
-{
-    VkResult result = GpaSession::ObjectFromHandle(gpaSession)->GetStatus();
-
-    return result;
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkGetGpaSessionResultsAMD(
-    VkDevice                                    device,
-    VkGpaSessionAMD                             gpaSession,
-    uint32_t                                    sampleID,
-    size_t*                                     pSizeInBytes,
-    void*                                       pData)
-{
-    VkResult result = GpaSession::ObjectFromHandle(gpaSession)->GetResults(
-        sampleID,
-        pSizeInBytes,
-        pData);
-
-    return result;
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkResetGpaSessionAMD(
-    VkDevice                                    device,
-    VkGpaSessionAMD                             gpaSession)
-{
-    VkResult result = GpaSession::ObjectFromHandle(gpaSession)->Reset();
-
-    return result;
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkCmdCopyGpaSessionResultsAMD(
-    VkCommandBuffer                             commandBuffer,
-    VkGpaSessionAMD                             gpaSession)
-{
-    GpaSession::ObjectFromHandle(gpaSession)->CmdCopyResults(ApiCmdBuffer::ObjectFromHandle(commandBuffer));
-}
-
-} // namespace entry
 
 } // namespace vk

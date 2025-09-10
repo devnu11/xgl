@@ -36,6 +36,7 @@
 
 #if VKI_RAY_TRACING
 #include "raytrace/vk_acceleration_structure.h"
+#include "entry/entry_vk_descriptor_update_template.cpp"
 #endif
 
 namespace vk
@@ -651,37 +652,5 @@ void DescriptorUpdateTemplate::UpdateEntryInlineUniformBlock(
     while (deviceIdx < numPalDevices);
 }
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorUpdateTemplate(
-    VkDevice                                        device,
-    VkDescriptorUpdateTemplate                      descriptorUpdateTemplate,
-    const VkAllocationCallbacks*                    pAllocator)
-{
-    if (descriptorUpdateTemplate != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        DescriptorUpdateTemplate::ObjectFromHandle(descriptorUpdateTemplate)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSetWithTemplate(
-    VkDevice                                        device,
-    VkDescriptorSet                                 descriptorSet,
-    VkDescriptorUpdateTemplate                      descriptorUpdateTemplate,
-    const void*                                     pData)
-{
-    Device*                   pDevice   = ApiDevice::ObjectFromHandle(device);
-    DescriptorUpdateTemplate* pTemplate = DescriptorUpdateTemplate::ObjectFromHandle(descriptorUpdateTemplate);
-
-    pTemplate->Update(pDevice, descriptorSet, pData);
-}
-
-} // namespace entry
 
 } // namespace vk

@@ -31,6 +31,7 @@
 #include "include/vk_sampler_ycbcr_conversion.h"
 
 #include "palDevice.h"
+#include "entry/entry_vk_sampler_ycbcr_conversion.cpp"
 
 namespace vk
 {
@@ -226,23 +227,5 @@ void SamplerYcbcrConversion::SetExtent(
     m_metaData.word5.lumaDepth  = depth;
 }
 
-namespace entry
-{
-
-VKAPI_ATTR void VKAPI_CALL vkDestroySamplerYcbcrConversion(
-    VkDevice                                    device,
-    VkSamplerYcbcrConversion                    ycbcrConversion,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (ycbcrConversion != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        SamplerYcbcrConversion::ObjectFromHandle(ycbcrConversion)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-} // namespace entry
 
 } // namespace vk

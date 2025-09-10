@@ -41,6 +41,7 @@
 
 #if VKI_RAY_TRACING
 #include "raytrace/ray_tracing_device.h"
+#include "entry/entry_vk_pipeline_layout.cpp"
 #endif
 
 namespace vk
@@ -1884,21 +1885,5 @@ VkResult PipelineLayout::Destroy(
     return VK_SUCCESS;
 }
 
-namespace entry
-{
-VKAPI_ATTR void VKAPI_CALL vkDestroyPipelineLayout(
-    VkDevice                                    device,
-    VkPipelineLayout                            pipelineLayout,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (pipelineLayout != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        PipelineLayout::ObjectFromHandle(pipelineLayout)->Destroy(pDevice, pAllocCB);
-    }
-}
-} // namespace entry
 
 } // namespace vk

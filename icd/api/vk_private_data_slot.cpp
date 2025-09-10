@@ -31,6 +31,7 @@
 
 #include "include/vk_private_data_slot.h"
 #include "include/vk_device.h"
+#include "entry/entry_vk_private_data_slot.cpp"
 
 namespace vk
 {
@@ -227,62 +228,5 @@ HashedPrivateDataMap* PrivateDataSlotEXT::GetUnreservedPrivateDataAddr(
     return pHashed;
 }
 
-namespace entry
-{
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCreatePrivateDataSlot(
-    VkDevice                                device,
-    const VkPrivateDataSlotCreateInfoEXT*   pCreateInfo,
-    const VkAllocationCallbacks*            pAllocator,
-    VkPrivateDataSlotEXT*                   pPrivateDataSlot)
-{
-    Device*                      pDevice = ApiDevice::ObjectFromHandle(device);
-    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-    return PrivateDataSlotEXT::Create(pDevice, pCreateInfo, pAllocCB, pPrivateDataSlot);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyPrivateDataSlot(
-    VkDevice                                device,
-    VkPrivateDataSlotEXT                    privateDataSlot,
-    const VkAllocationCallbacks*            pAllocator)
-{
-    Device*                      pDevice = ApiDevice::ObjectFromHandle(device);
-    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-    PrivateDataSlotEXT*          pPrivate = PrivateDataSlotEXT::ObjectFromHandle(privateDataSlot);
-
-    pPrivate->Destroy(pDevice, pAllocCB);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkSetPrivateData(
-    VkDevice                                device,
-    VkObjectType                            objectType,
-    uint64_t                                objectHandle,
-    VkPrivateDataSlotEXT                    privateDataSlot,
-    uint64_t                                data)
-{
-    Device*                      pDevice = ApiDevice::ObjectFromHandle(device);
-    PrivateDataSlotEXT*          pPrivate = PrivateDataSlotEXT::ObjectFromHandle(privateDataSlot);
-
-    return pPrivate->SetPrivateDataEXT(pDevice, objectType, objectHandle, data);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkGetPrivateData(
-    VkDevice                                device,
-    VkObjectType                            objectType,
-    uint64_t                                objectHandle,
-    VkPrivateDataSlotEXT                    privateDataSlot,
-    uint64_t*                               pData)
-{
-    Device*                      pDevice = ApiDevice::ObjectFromHandle(device);
-    PrivateDataSlotEXT*          pPrivate = PrivateDataSlotEXT::ObjectFromHandle(privateDataSlot);
-
-    return pPrivate->GetPrivateDataEXT(pDevice, objectType, objectHandle, pData);
-}
-
-} // namespace entry
 
 } // namespace vk

@@ -51,6 +51,7 @@
 #include "palAutoBuffer.h"
 
 #include <stdio.h>
+#include "entry/entry_vk_swapchain.cpp"
 
 using namespace std::chrono_literals;
 
@@ -2032,99 +2033,5 @@ Pal::IQueue* SwCompositor::DoSwCompositing(
  ***********************************************************************************************************************
  */
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroySwapchainKHR(
-    VkDevice                                    device,
-    VkSwapchainKHR                              swapchain,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (swapchain != VK_NULL_HANDLE)
-    {
-        const Device*                pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        SwapChain::ObjectFromHandle(swapchain)->Destroy(pAllocCB);
-    }
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkGetSwapchainImagesKHR(
-    VkDevice                                     device,
-    VkSwapchainKHR                               swapchain,
-    uint32_t*                                    pSwapchainImageCount,
-    VkImage*                                     pSwapchainImages)
-{
-    return SwapChain::ObjectFromHandle(swapchain)->GetSwapchainImagesKHR(pSwapchainImageCount, pSwapchainImages);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkAcquireNextImageKHR(
-    VkDevice                                     device,
-    VkSwapchainKHR                               swapchain,
-    uint64_t                                     timeout,
-    VkSemaphore                                  semaphore,
-    VkFence                                      fence,
-    uint32_t*                                    pImageIndex)
-{
-    constexpr uint32_t deviceMask = 1;
-
-    const VkAcquireNextImageInfoKHR acquireInfo =
-    {
-        VK_STRUCTURE_TYPE_ACQUIRE_NEXT_IMAGE_INFO_KHR,
-        nullptr,
-        swapchain,
-        timeout,
-        semaphore,
-        fence,
-        deviceMask
-    };
-
-    union
-    {
-        const VkStructHeader*             pHeader;
-        const VkAcquireNextImageInfoKHR*  pAcquireInfoKHR;
-    };
-
-    pAcquireInfoKHR = &acquireInfo;
-
-    return SwapChain::ObjectFromHandle(swapchain)->AcquireNextImage(pHeader, pImageIndex);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkAcquireNextImage2KHR(
-    VkDevice                                    device,
-    const VkAcquireNextImageInfoKHR*            pAcquireInfo,
-    uint32_t*                                   pImageIndex)
-{
-    union
-    {
-        const VkStructHeader*             pHeader;
-        const VkAcquireNextImageInfoKHR*  pAcquireInfoKHR;
-    };
-
-    pAcquireInfoKHR = pAcquireInfo;
-
-    return SwapChain::ObjectFromHandle(pAcquireInfo->swapchain)->AcquireNextImage(pHeader, pImageIndex);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkSetHdrMetadataEXT(
-    VkDevice                                    device,
-    uint32_t                                    swapchainCount,
-    const VkSwapchainKHR*                       pSwapchains,
-    const VkHdrMetadataEXT*                     pMetadata)
-{
-    Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    for (uint32_t swapChainIndex = 0; (swapChainIndex < swapchainCount); swapChainIndex++)
-    {
-        SwapChain::ObjectFromHandle(pSwapchains[swapChainIndex])->SetHdrMetadata(pMetadata);
-    }
-}
-
-} // namespace entry
 
 } // namespace vk

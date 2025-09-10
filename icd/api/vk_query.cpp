@@ -38,6 +38,7 @@
 #include "palAutoBuffer.h"
 #include "palQueryPool.h"
 #include "palSysUtil.h"
+#include "entry/entry_vk_query.cpp"
 
 namespace vk
 {
@@ -1108,56 +1109,5 @@ void AccelerationStructureQueryPool::Reset(
 }
 #endif
 
-namespace entry
-{
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkGetQueryPoolResults(
-    VkDevice                                    device,
-    VkQueryPool                                 queryPool,
-    uint32_t                                    firstQuery,
-    uint32_t                                    queryCount,
-    size_t                                      dataSize,
-    void*                                       pData,
-    VkDeviceSize                                stride,
-    VkQueryResultFlags                          flags)
-{
-    Device* pDevice = ApiDevice::ObjectFromHandle(device);
-    return QueryPool::ObjectFromHandle(queryPool)->GetResults(
-        pDevice,
-        firstQuery,
-        queryCount,
-        dataSize,
-        pData,
-        stride,
-        flags);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyQueryPool(
-    VkDevice                                    device,
-    VkQueryPool                                 queryPool,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (queryPool != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        QueryPool::ObjectFromHandle(queryPool)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkResetQueryPool(
-    VkDevice                                    device,
-    VkQueryPool                                 queryPool,
-    uint32_t                                    firstQuery,
-    uint32_t                                    queryCount)
-{
-    Device* pDevice = ApiDevice::ObjectFromHandle(device);
-    QueryPool::ObjectFromHandle(queryPool)->Reset(pDevice, firstQuery, queryCount);
-}
-
-} // namespace entry
 
 } // namespace vk

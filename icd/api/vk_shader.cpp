@@ -32,6 +32,7 @@
 #include "palMetroHash.h"
 
 #include <climits>
+#include "entry/entry_vk_shader.cpp"
 
 namespace vk
 {
@@ -235,64 +236,5 @@ VkResult ShaderModule::Destroy(
     return VK_SUCCESS;
 }
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyShaderModule(
-    VkDevice                                    device,
-    VkShaderModule                              shaderModule,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (shaderModule != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        ShaderModule::ObjectFromHandle(shaderModule)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkGetShaderModuleIdentifierEXT(
-    VkDevice                                    device,
-    VkShaderModule                              shaderModule,
-    VkShaderModuleIdentifierEXT*                pIdentifier)
-{
-    const ShaderModule* pShaderModule = ShaderModule::ObjectFromHandle(shaderModule);
-    Pal::ShaderHash shaderHash        = pShaderModule->GetCodeHash();
-
-    // Get the 128 bit ShaderModule Hash
-    memcpy(&pIdentifier->identifier[0], &shaderHash.lower, sizeof(shaderHash.lower));
-    memcpy(&pIdentifier->identifier[8], &shaderHash.upper, sizeof(shaderHash.upper));
-    pIdentifier->identifierSize = sizeof(shaderHash);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkGetShaderModuleCreateInfoIdentifierEXT(
-    VkDevice                                    device,
-    const VkShaderModuleCreateInfo*             pCreateInfo,
-    VkShaderModuleIdentifierEXT*                pIdentifier)
-{
-    MetroHash::Hash moduleHash = {};
-
-    Device* pDevice = ApiDevice::ObjectFromHandle(device);
-
-    MetroHash64::Hash(
-        reinterpret_cast<const uint8_t*>(pCreateInfo->pCode),
-        pCreateInfo->codeSize,
-        moduleHash.bytes);
-
-    Pal::ShaderHash shaderModuleHash = ShaderModule::BuildCodeHash(
-        pCreateInfo->pCode,
-        pCreateInfo->codeSize);
-
-    // Get the 128 bit ShaderModule Hash (Profile Hash)
-    memcpy(&pIdentifier->identifier[0], &shaderModuleHash.lower, sizeof(shaderModuleHash.lower));
-    memcpy(&pIdentifier->identifier[8], &shaderModuleHash.upper, sizeof(shaderModuleHash.upper));
-    pIdentifier->identifierSize = sizeof(shaderModuleHash);
-}
-
-} // namespace entry
 
 } // namespace vk

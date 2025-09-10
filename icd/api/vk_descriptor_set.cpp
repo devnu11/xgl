@@ -41,6 +41,7 @@
 
 #if VKI_RAY_TRACING
 #include "raytrace/vk_acceleration_structure.h"
+#include "entry/entry_vk_descriptor_set.cpp"
 #endif
 
 namespace vk
@@ -1080,24 +1081,6 @@ PFN_vkUpdateDescriptorSets DescriptorUpdate::GetUpdateDescriptorSetsFunc(
     return pFunc;
 }
 
-namespace entry
-{
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
-    VkDevice                                    device,
-    uint32_t                                    descriptorWriteCount,
-    const VkWriteDescriptorSet*                 pDescriptorWrites,
-    uint32_t                                    descriptorCopyCount,
-    const VkCopyDescriptorSet*                  pDescriptorCopies)
-{
-    const Device*             pDevice          = ApiDevice::ObjectFromHandle(device);
-
-    pDevice->GetEntryPoints().vkUpdateDescriptorSets(
-        device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
-}
-
-} // namespace entry
 
 // =====================================================================================================================
 // Template instantiation needed for references in other files.  Linux complains if we don't do this.

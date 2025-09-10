@@ -26,6 +26,7 @@
 #include "include/vk_debug_utils.h"
 #include "include/vk_instance.h"
 #include "include/vk_device.h"
+#include "entry/entry_vk_debug_utils.cpp"
 
 namespace vk
 {
@@ -114,46 +115,5 @@ void* DebugUtilsMessenger::GetUserData()
     return m_createInfo.pUserData;
 }
 
-namespace entry
-{
-// =====================================================================================================================
-VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
-    VkInstance                                  instance,
-    const VkDebugUtilsMessengerCreateInfoEXT*   pCreateInfo,
-    const VkAllocationCallbacks*                pAllocator,
-    VkDebugUtilsMessengerEXT*                   pMessenger)
-{
-    Instance* pInstance = Instance::ObjectFromHandle(instance);
-
-    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pInstance->GetAllocCallbacks();
-
-    return DebugUtilsMessenger::Create(pInstance, pCreateInfo, pAllocCB, pMessenger);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkDestroyDebugUtilsMessengerEXT(
-    VkInstance                                  instance,
-    VkDebugUtilsMessengerEXT                    messenger,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    Instance* pInstance = Instance::ObjectFromHandle(instance);
-
-    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pInstance->GetAllocCallbacks();
-
-    DebugUtilsMessenger::ObjectFromHandle(messenger)->Destroy(pInstance, pAllocCB);
-}
-
-// =====================================================================================================================
-VKAPI_ATTR void VKAPI_CALL vkSubmitDebugUtilsMessageEXT(
-    VkInstance                                  instance,
-    VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT             messageTypes,
-    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
-{
-    Instance* pInstance = Instance::ObjectFromHandle(instance);
-
-    pInstance->CallExternalMessengers(messageSeverity, messageTypes, pCallbackData);
-}
-} // namespace entry
 
 } // namespace vk

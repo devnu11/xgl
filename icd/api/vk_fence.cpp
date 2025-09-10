@@ -35,6 +35,7 @@
 #include "include/vk_instance.h"
 
 #include "palFence.h"
+#include "entry/entry_vk_fence.cpp"
 
 namespace vk
 {
@@ -316,51 +317,5 @@ VkResult Fence::RestoreFence(
     return ret;
 }
 
-namespace entry
-{
-
-VKAPI_ATTR VkResult VKAPI_CALL vkGetFenceStatus(
-    VkDevice                                    device,
-    VkFence                                     fence)
-{
-    return Fence::ObjectFromHandle(fence)->GetStatus();
-}
-
-VKAPI_ATTR void VKAPI_CALL vkDestroyFence(
-    VkDevice                                    device,
-    VkFence                                     fence,
-    const VkAllocationCallbacks*                pAllocator)
-{
-    if (fence != VK_NULL_HANDLE)
-    {
-        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-        Fence::ObjectFromHandle(fence)->Destroy(pDevice, pAllocCB);
-    }
-}
-
-#if defined(__unix__)
-VKAPI_ATTR VkResult VKAPI_CALL vkImportFenceFdKHR(
-    VkDevice                                    device,
-    const VkImportFenceFdInfoKHR*               pImportFenceFdInfo)
-{
-    Device*    pDevice  = ApiDevice::ObjectFromHandle(device);
-
-    return Fence::ObjectFromHandle(pImportFenceFdInfo->fence)->ImportFenceFd(pDevice, pImportFenceFdInfo);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL vkGetFenceFdKHR(
-    VkDevice                                    device,
-    const VkFenceGetFdInfoKHR*                  pGetFdInfo,
-    int*                                        pFd)
-{
-    Device*    pDevice  = ApiDevice::ObjectFromHandle(device);
-
-    return Fence::ObjectFromHandle(pGetFdInfo->fence)->GetFenceFd(pDevice, pGetFdInfo, pFd);
-}
-#endif
-
-} // namespace entry
 
 } // namespace vk
