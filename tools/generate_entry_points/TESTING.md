@@ -10,7 +10,7 @@ The XGL Entry Point Generator includes comprehensive CTest integration with mult
 Individual module testing with fast execution:
 ```bash
 # Run all unit tests in parallel
-make test_generator_unit
+cmake --build . --target test_generator_unit
 
 # Run specific module tests
 ctest -R "entry_generator_test_xml_parser" -V
@@ -21,7 +21,7 @@ ctest -R "entry_generator_test_type_mapper" -V
 Full workflow testing:
 ```bash
 # Run integration tests
-make test_generator_integration
+cmake --build . --target test_generator_integration
 
 # Run complete test suite
 ctest -R "entry_generator_test_suite" -V
@@ -31,7 +31,7 @@ ctest -R "entry_generator_test_suite" -V
 Style and formatting validation:
 ```bash
 # Run code quality checks
-make test_generator_quality
+cmake --build . --target test_generator_quality
 
 # Individual quality check
 ctest -R "entry_generator_code_quality" -V
@@ -41,7 +41,7 @@ ctest -R "entry_generator_code_quality" -V
 Test coverage reporting:
 ```bash
 # Run tests with coverage
-make test_generator_coverage
+cmake --build . --target test_generator_coverage
 
 # View coverage report
 ctest -R "entry_generator_test_with_coverage" -V
@@ -82,17 +82,17 @@ ctest --label-regex "entry_generator" --output-junit test_results.xml
 ctest -D Experimental
 ```
 
-## Make Targets
+## CMake Build Targets
 
 ### Primary Targets
-- `make test_generator` - Run all tests with parallel execution
-- `make test_generator_verbose` - Run all tests with detailed output
+- `cmake --build . --target test_generator` - Run all tests with parallel execution
+- `cmake --build . --target test_generator_verbose` - Run all tests with detailed output
 
 ### Category Targets
-- `make test_generator_unit` - Unit tests only (fast)
-- `make test_generator_integration` - Integration tests only  
-- `make test_generator_quality` - Code quality checks only
-- `make test_generator_coverage` - Coverage analysis
+- `cmake --build . --target test_generator_unit` - Unit tests only (fast)
+- `cmake --build . --target test_generator_integration` - Integration tests only  
+- `cmake --build . --target test_generator_quality` - Code quality checks only
+- `cmake --build . --target test_generator_coverage` - Coverage analysis
 
 ## Test Configuration
 
@@ -156,8 +156,8 @@ The test targets integrate seamlessly with the XGL build system:
 # From XGL root directory
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug
-make generate_entry_points
-make test_generator
+cmake --build . --target generate_entry_points
+cmake --build . --target test_generator
 ```
 
 Tests automatically run as part of the CI/CD pipeline and provide detailed feedback for code quality and functionality verification.

@@ -7,23 +7,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 set(ENTRY_GENERATOR_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(ENTRY_GENERATOR_SCRIPT "${ENTRY_GENERATOR_DIR}/main.py")
 set(ENTRY_OUTPUT_DIR "${CMAKE_BINARY_DIR}/generated/entry_points")
-
-# Download vk.xml if not present
-set(VK_XML_URL "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Headers/main/registry/vk.xml")
-set(VK_XML_PATH "${CMAKE_BINARY_DIR}/vk.xml")
-
-# Download vk.xml target
-add_custom_command(
-    OUTPUT ${VK_XML_PATH}
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}"
-    COMMAND Python3::Interpreter -c "
-import urllib.request
-urllib.request.urlretrieve('${VK_XML_URL}', '${VK_XML_PATH}')
-print('Downloaded vk.xml')
-"
-    COMMENT "Downloading Vulkan XML registry"
-    VERBATIM
-)
+set(VK_XML_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../icd/api/include/khronos/sdk-1.4/vulkan/vk.xml")
 
 # Generate entry points target
 add_custom_command(
@@ -34,7 +18,7 @@ add_custom_command(
         --output-dir "${ENTRY_OUTPUT_DIR}"
         --verbose
     COMMAND ${CMAKE_COMMAND} -E touch "${ENTRY_OUTPUT_DIR}/generated.stamp"
-    DEPENDS ${VK_XML_PATH} 
+    DEPENDS ${VK_XML_PATH}
             ${ENTRY_GENERATOR_SCRIPT}
             "${ENTRY_GENERATOR_DIR}/xml_parser.py"
             "${ENTRY_GENERATOR_DIR}/code_generator.py"
