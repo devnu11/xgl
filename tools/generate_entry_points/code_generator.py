@@ -58,9 +58,10 @@ class EntryPointGenerator:
         
         # Map function patterns to existing file organization
         object_mappings = {
-            'buffer': ['buffer'],
-            'buffer_view': ['bufferview'],  
+            'cmd_buffer': ['allocatecommandbuffers', 'begincommandbuffer', 'endcommandbuffer', 'resetcommandbuffer'],
             'cmd_pool': ['commandpool'],
+            'buffer': ['buffer'],
+            'buffer_view': ['bufferview'],
             'debug_report': ['debugreportcallback'],
             'debug_utils': ['debugutils'],
             'deferred_operation': ['deferredoperation'],
@@ -103,10 +104,22 @@ class EntryPointGenerator:
         # Fallback based on first handle parameter type
         first_param = command.get_first_handle_param()
         if first_param:
-            return self.type_mapper.get_xgl_type(first_param.type_name).lower()
+            xgl_type = self.type_mapper.get_xgl_type(first_param.type_name)
+            # Convert PascalCase to snake_case for file naming
+            return self._pascal_to_snake_case(xgl_type)
             
         # Final fallback 
         return 'device'
+    
+    def _pascal_to_snake_case(self, pascal_str: str) -> str:
+        """Convert PascalCase to snake_case."""
+        import re
+        
+        # Insert underscores before capital letters (except the first one)
+        snake_str = re.sub(r'(?<!^)([A-Z])', r'_\1', pascal_str)
+        
+        # Convert to lowercase
+        return snake_str.lower()
     
     def _generate_file_for_object_type(self, object_type: str, commands: List[Command]) -> None:
         """Generate entry point file for specific object type."""
