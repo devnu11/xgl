@@ -95,6 +95,11 @@ class VulkanRegistryParser:
         # Parse parameters
         parameters = []
         for param_elem in command_elem.findall('param'):
+            # Skip parameters that are specific to non-vulkan APIs (e.g., vulkansc)
+            api_attr = param_elem.get('api')
+            if api_attr is not None and api_attr != 'vulkan':
+                continue
+                
             param = self._parse_parameter(param_elem)
             if param:
                 parameters.append(param)

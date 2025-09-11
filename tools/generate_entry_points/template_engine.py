@@ -141,20 +141,20 @@ class TemplateEngine:
                 return self.repo.SELF_DESTROY_FUNCTION_BODY.render(**context)
             else:
                 return self.repo.DESTROY_FUNCTION_BODY.render(**context)
-        elif function_type == 'device':
-            return self.repo.DEVICE_FUNCTION_BODY.render(**context)
-        elif function_type == 'instance':
-            return self.repo.INSTANCE_FUNCTION_BODY.render(**context)
-        elif function_type == 'global':
-            return self.repo.GLOBAL_FUNCTION_BODY.render(**context)
-        elif context.get('return_type') == 'void' and context.get('handle_param'):
-            return self.repo.VOID_FUNCTION_BODY.render(**context)
         elif context.get('handle_param'):
-            # Use direct template for non-void functions without allocator logic
-            if context.get('allocator_logic') == '':
+            # Handle-based functions - use direct/void templates for simple cases
+            if context.get('return_type') == 'void' and context.get('allocator_logic') == '':
+                return self.repo.VOID_FUNCTION_BODY.render(**context)
+            elif context.get('return_type') != 'void' and context.get('allocator_logic') == '':
                 return self.repo.DIRECT_FUNCTION_BODY.render(**context)
+            elif function_type == 'device':
+                return self.repo.DEVICE_FUNCTION_BODY.render(**context)
+            elif function_type == 'instance':
+                return self.repo.INSTANCE_FUNCTION_BODY.render(**context)
             else:
                 return self.repo.SIMPLE_FUNCTION_BODY.render(**context)
+        elif function_type == 'global':
+            return self.repo.GLOBAL_FUNCTION_BODY.render(**context)
         else:
             # Global function with no handle
             return self.repo.GLOBAL_FUNCTION_BODY.render(**context)

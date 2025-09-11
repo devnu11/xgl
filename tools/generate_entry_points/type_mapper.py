@@ -91,7 +91,13 @@ class TypeMapper:
     def format_method_parameters(self, parameters: list[Parameter], skip_first: bool = True) -> str:
         """Format parameters for method call (excluding handle parameter)."""
         params_to_use = parameters[1:] if skip_first else parameters
-        return ", ".join([param.name for param in params_to_use])
+        param_names = [param.name for param in params_to_use]
+        
+        # If 3 or more parameters or line would exceed 120 chars, use line wrapping
+        if len(param_names) >= 3 or len(", ".join(param_names)) > 80:  # Leave room for method call syntax
+            return "\n" + " " * 8 + (",\n" + " " * 8).join(param_names)
+        else:
+            return ", ".join(param_names)
     
     def get_allocator_parameter(self, parameters: list[Parameter]) -> Optional[str]:
         """Find allocator callback parameter."""

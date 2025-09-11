@@ -651,7 +651,12 @@ class EntryPointGenerator:
                 param_names.append('pAllocCB')
             else:
                 param_names.append(param.name)
-        return ", ".join(param_names)
+        
+        # If 3 or more parameters or line would exceed 120 chars, use line wrapping
+        if len(param_names) >= 3 or len(", ".join(param_names)) > 80:  # Leave room for method call syntax
+            return "\n" + " " * 8 + (",\n" + " " * 8).join(param_names)
+        else:
+            return ", ".join(param_names)
     
     def _build_handle_context(self, command: Command, handle_param) -> Dict[str, str]:
         """Build context for handle-based functions."""
