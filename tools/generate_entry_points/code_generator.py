@@ -79,16 +79,379 @@ class EntryPointGenerator:
         return filtered
     
     def _group_commands_by_object_type(self, commands: Dict[str, Command]) -> Dict[str, List[Command]]:
-        """Group commands by their primary object type."""
+        """Group commands by explicit file mappings, preserving the order specified in mappings."""
+        file_mappings = self._get_file_mappings()
+        
         groups: Dict[str, List[Command]] = {}
+        unmapped_functions = []
+        
+        # Iterate through file mappings in order to preserve function ordering
+        for file_name, func_list in file_mappings.items():
+            groups[file_name] = []
+            for func_name in func_list:
+                if func_name in commands:
+                    groups[file_name].append(commands[func_name])
+                else:
+                    # Function is mapped but not found in commands (filtered out or doesn't exist)
+                    pass
+        
+        # Check for functions in commands that aren't mapped to any file
+        mapped_functions = set()
+        for func_list in file_mappings.values():
+            mapped_functions.update(func_list)
         
         for command in commands.values():
-            object_type = self._get_object_type_from_command(command)
-            if object_type not in groups:
-                groups[object_type] = []
-            groups[object_type].append(command)
+            if command.name not in mapped_functions:
+                unmapped_functions.append(command.name)
+        
+        # Report and ignore unmapped functions (they don't exist in current files)
+        if unmapped_functions:
+            self._log_info(f"INFO: Ignoring {len(unmapped_functions)} unmapped functions (not in existing entry files):")
+            for func in sorted(unmapped_functions):
+                self._log_info(f"  - {func}")
+            self._log_info("These functions will not be generated unless added to the file mappings.")
         
         return groups
+    
+    def _get_file_mappings(self) -> Dict[str, List[str]]:
+        """Get explicit mapping of file names to lists of function names."""
+        return {
+            'buffer': 
+            [
+                'vkDestroyBuffer',
+				'vkBindBufferMemory',
+				'vkGetBufferMemoryRequirements',
+				'vkGetBufferMemoryRequirements2',
+				'vkGetBufferDeviceAddress',
+				'vkGetBufferOpaqueCaptureAddress'
+            ],
+            'buffer_view': 
+			[
+                'vkDestroyBufferView'
+            ],
+            'cmd_buffer': 
+            [
+                'vkBeginCommandBuffer',
+				'vkEndCommandBuffer',
+				'vkResetCommandBuffer',
+				'vkCmdBindPipeline',
+				'vkCmdBindDescriptorSets',
+				'vkCmdBindIndexBuffer',
+				'vkCmdBindIndexBuffer2',
+				'vkCmdBindDescriptorSets2',
+				'vkCmdPushConstants2',
+				'vkCmdPushDescriptorSet2',
+				'vkCmdPushDescriptorSetWithTemplate2',
+				'vkCmdSetDescriptorBufferOffsets2EXT',
+				'vkCmdBindDescriptorBufferEmbeddedSamplers2EXT',
+				'vkCmdBindVertexBuffers',
+				'vkCmdDraw',
+				'vkCmdDrawIndexed',
+				'vkCmdDrawIndirect',
+				'vkCmdDrawIndexedIndirect',
+				'vkCmdDrawIndirectCount',
+				'vkCmdDrawIndexedIndirectCount',
+				'vkCmdDrawMeshTasksEXT',
+				'vkCmdDrawMeshTasksIndirectEXT',
+				'vkCmdDrawMeshTasksIndirectCountEXT',
+				'vkCmdDispatch',
+				'vkCmdDispatchIndirect',
+				'vkCmdPreprocessGeneratedCommandsNV',
+				'vkCmdExecuteGeneratedCommandsNV',
+				'vkCmdBindPipelineShaderGroupNV',
+				'vkCmdUpdatePipelineIndirectBufferNV',
+				'vkCmdPreprocessGeneratedCommandsEXT',
+				'vkCmdExecuteGeneratedCommandsEXT',
+				'vkCmdCopyBuffer',
+				'vkCmdCopyImage',
+				'vkCmdBlitImage',
+				'vkCmdCopyBufferToImage',
+				'vkCmdCopyImageToBuffer',
+				'vkCmdUpdateBuffer',
+				'vkCmdFillBuffer',
+				'vkCmdClearColorImage',
+				'vkCmdClearDepthStencilImage',
+				'vkCmdClearAttachments',
+				'vkCmdResolveImage',
+				'vkCmdSetEvent',
+				'vkCmdResetEvent',
+				'vkCmdWaitEvents',
+				'vkCmdPipelineBarrier',
+				'vkCmdBeginQuery',
+				'vkCmdEndQuery',
+				'vkCmdResetQueryPool',
+				'vkCmdWriteTimestamp',
+				'vkCmdCopyQueryPoolResults',
+				'vkCmdPushConstants',
+				'vkCmdBeginRenderPass',
+				'vkCmdBeginRenderPass2',
+				'vkCmdNextSubpass',
+				'vkCmdNextSubpass2',
+				'vkCmdEndRenderPass',
+				'vkCmdEndRenderPass2',
+				'vkCmdExecuteCommands',
+				'vkFreeCommandBuffers',
+				'vkCmdDispatchBase',
+				'vkCmdSetDeviceMask',
+				'vkCmdSetViewport',
+				'vkCmdSetScissor',
+				'vkCmdSetLineWidth',
+				'vkCmdSetDepthBias',
+				'vkCmdSetBlendConstants',
+				'vkCmdSetDepthBounds',
+				'vkCmdSetStencilCompareMask',
+				'vkCmdSetStencilWriteMask',
+				'vkCmdSetStencilReference',
+				'vkCmdDebugMarkerBeginEXT',
+				'vkCmdDebugMarkerEndEXT',
+				'vkCmdDebugMarkerInsertEXT',
+				'vkCmdBeginDebugUtilsLabelEXT',
+				'vkCmdEndDebugUtilsLabelEXT',
+				'vkCmdInsertDebugUtilsLabelEXT',
+				'vkCmdSetSampleLocationsEXT',
+				'vkCmdWriteBufferMarkerAMD',
+				'vkCmdBindTransformFeedbackBuffersEXT',
+				'vkCmdBeginTransformFeedbackEXT',
+				'vkCmdEndTransformFeedbackEXT',
+				'vkCmdBeginQueryIndexedEXT',
+				'vkCmdEndQueryIndexedEXT',
+				'vkCmdDrawIndirectByteCountEXT',
+				'vkCmdBuildAccelerationStructuresKHR',
+				'vkCmdBuildAccelerationStructuresIndirectKHR',
+				'vkCmdTraceRaysKHR',
+				'vkCmdTraceRaysIndirectKHR',
+				'vkCmdCopyAccelerationStructureKHR',
+				'vkCmdWriteAccelerationStructuresPropertiesKHR',
+				'vkCmdCopyAccelerationStructureToMemoryKHR',
+				'vkCmdCopyMemoryToAccelerationStructureKHR',
+				'vkCmdSetRayTracingPipelineStackSizeKHR',
+				'vkCmdTraceRaysIndirect2KHR',
+				'vkCmdBuildMicromapsEXT',
+				'vkCmdCopyMemoryToMicromapEXT',
+				'vkCmdCopyMicromapEXT',
+				'vkCmdCopyMicromapToMemoryEXT',
+				'vkCmdWriteMicromapsPropertiesEXT',
+				'vkCmdSetLineStipple',
+				'vkCmdSetFragmentShadingRateKHR',
+				'vkCmdBeginConditionalRenderingEXT',
+				'vkCmdEndConditionalRenderingEXT',
+				'vkCmdSetEvent2',
+				'vkCmdResetEvent2',
+				'vkCmdWaitEvents2',
+				'vkCmdPipelineBarrier2',
+				'vkCmdWriteTimestamp2',
+				'vkCmdWriteBufferMarker2AMD',
+				'vkCmdBeginRendering',
+				'vkCmdEndRendering',
+				'vkCmdSetCullMode',
+				'vkCmdSetFrontFace',
+				'vkCmdSetPrimitiveTopology',
+				'vkCmdSetViewportWithCount',
+				'vkCmdSetScissorWithCount',
+				'vkCmdBindVertexBuffers2',
+				'vkCmdSetDepthTestEnable',
+				'vkCmdSetDepthWriteEnable',
+				'vkCmdSetDepthCompareOp',
+				'vkCmdSetDepthBoundsTestEnable',
+				'vkCmdSetStencilTestEnable',
+				'vkCmdSetStencilOp',
+				'vkCmdBindDescriptorBuffersEXT',
+				'vkCmdSetDescriptorBufferOffsetsEXT',
+				'vkCmdBindDescriptorBufferEmbeddedSamplersEXT',
+				'vkCmdSetColorWriteEnableEXT',
+				'vkCmdSetRasterizerDiscardEnable',
+				'vkCmdSetPrimitiveRestartEnable',
+				'vkCmdSetDepthBiasEnable',
+				'vkCmdSetLogicOpEXT',
+				'vkCmdSetPatchControlPointsEXT',
+				'vkCmdSetDepthClampRangeEXT',
+				'vkCmdBlitImage2',
+				'vkCmdCopyBuffer2',
+				'vkCmdCopyBufferToImage2',
+				'vkCmdCopyImage2',
+				'vkCmdCopyImageToBuffer2',
+				'vkCmdResolveImage2',
+				'vkCmdPushDescriptorSet',
+				'vkCmdPushDescriptorSetWithTemplate',
+				'vkCmdSetTessellationDomainOriginEXT',
+				'vkCmdSetDepthClampEnableEXT',
+				'vkCmdSetPolygonModeEXT',
+				'vkCmdSetRasterizationSamplesEXT',
+				'vkCmdSetSampleMaskEXT',
+				'vkCmdSetAlphaToCoverageEnableEXT',
+				'vkCmdSetAlphaToOneEnableEXT',
+				'vkCmdSetLogicOpEnableEXT',
+				'vkCmdSetColorBlendEnableEXT',
+				'vkCmdSetColorBlendEquationEXT',
+				'vkCmdSetColorWriteMaskEXT',
+				'vkCmdSetRasterizationStreamEXT',
+				'vkCmdSetConservativeRasterizationModeEXT',
+				'vkCmdSetExtraPrimitiveOverestimationSizeEXT',
+				'vkCmdSetDepthClipEnableEXT',
+				'vkCmdSetSampleLocationsEnableEXT',
+				'vkCmdSetColorBlendAdvancedEXT',
+				'vkCmdSetProvokingVertexModeEXT',
+				'vkCmdSetLineRasterizationModeEXT',
+				'vkCmdSetLineStippleEnableEXT',
+				'vkCmdSetDepthClipNegativeOneToOneEXT',
+				'vkCmdSetVertexInputEXT',
+				'vkCmdSetRenderingAttachmentLocations',
+				'vkCmdSetRenderingInputAttachmentIndices',
+				'vkCmdSetDepthBias2EXT'
+            ],
+            'cmd_pool': 
+            [
+                'vkDestroyCommandPool',
+				'vkResetCommandPool',
+				'vkTrimCommandPool'
+            ],
+            'debug_report': 
+            [
+                'vkCreateDebugReportCallbackEXT',
+				'vkDestroyDebugReportCallbackEXT',
+				'vkDebugReportMessageEXT'
+            ],
+            'debug_utils': 
+            [
+                'vkCreateDebugUtilsMessengerEXT',
+				'vkDestroyDebugUtilsMessengerEXT',
+				'vkSubmitDebugUtilsMessageEXT'
+            ],
+            'deferred_operation': 
+            [
+                'vkDestroyDeferredOperationKHR',
+				'vkGetDeferredOperationResultKHR',
+				'vkGetDeferredOperationMaxConcurrencyKHR',
+				'vkDeferredOperationJoinKHR'
+            ],
+            'descriptor_buffer': 
+            [
+                'vkGetDescriptorSetLayoutSizeEXT',
+				'vkGetDescriptorSetLayoutBindingOffsetEXT',
+				'vkGetDescriptorEXT',
+				'vkGetBufferOpaqueCaptureDescriptorDataEXT',
+				'vkGetImageOpaqueCaptureDescriptorDataEXT',
+				'vkGetImageViewOpaqueCaptureDescriptorDataEXT',
+				'vkGetSamplerOpaqueCaptureDescriptorDataEXT',
+				'vkGetAccelerationStructureOpaqueCaptureDescriptorDataEXT'
+            ],
+            'descriptor_pool': 
+            [
+                'vkCreateDescriptorPool',
+				'vkFreeDescriptorSets',
+				'vkResetDescriptorPool',
+				'vkDestroyDescriptorPool',
+				'vkAllocateDescriptorSets'
+            ],
+            'descriptor_set': 
+            [
+                'vkUpdateDescriptorSets'
+            ],
+            'descriptor_set_layout': 
+            [
+                'vkDestroyDescriptorSetLayout'
+            ],
+            'descriptor_update_template': 
+            [
+                'vkDestroyDescriptorUpdateTemplate', 'vkUpdateDescriptorSetWithTemplate'
+            ],
+            'device': 
+            [
+                'vkCreateFence', 'vkWaitForFences', 'vkResetFences', 'vkGetDeviceQueue', 'vkGetDeviceQueue2', 'vkCreateSemaphore', 'vkDestroyDevice', 'vkDeviceWaitIdle', 'vkCreateEvent', 'vkCreateQueryPool', 'vkCreateDescriptorSetLayout', 'vkCreatePipelineLayout', 'vkCreateFramebuffer', 'vkCreateRenderPass', 'vkCreateRenderPass2', 'vkCreateBuffer', 'vkCreateBufferView', 'vkCreateImage', 'vkCreateImageView', 'vkCreateShaderModule', 'vkCreatePipelineCache', 'vkCreateGraphicsPipelines', 'vkCreateComputePipelines', 'vkCreateSampler', 'vkCreateSamplerYcbcrConversion', 'vkCreateSwapchainKHR', 'vkGetRenderAreaGranularity', 'vkGetRenderingAreaGranularity', 'vkAllocateCommandBuffers', 'vkCreateCommandPool', 'vkAllocateMemory', 'vkImportSemaphoreFdKHR', 'vkBindBufferMemory2', 'vkBindImageMemory2', 'vkCreateDescriptorUpdateTemplate', 'vkGetDeviceGroupPeerMemoryFeatures', 'vkGetDeviceGroupPresentCapabilitiesKHR', 'vkGetDeviceGroupSurfacePresentModesKHR', 'vkDebugMarkerSetObjectTagEXT', 'vkDebugMarkerSetObjectNameEXT', 'vkSetDebugUtilsObjectTagEXT', 'vkSetDebugUtilsObjectNameEXT', 'vkSetGpaDeviceClockModeAMD', 'vkGetGpaDeviceClockInfoAMD', 'vkGetDescriptorSetLayoutSupport', 'vkGetCalibratedTimestampsEXT', 'vkGetSemaphoreCounterValue', 'vkWaitSemaphores', 'vkSignalSemaphore', 'vkGetMemoryHostPointerPropertiesEXT', 'vkCreateAccelerationStructureKHR', 'vkCreateRayTracingPipelinesKHR', 'vkBuildAccelerationStructuresKHR', 'vkCopyAccelerationStructureKHR', 'vkCopyAccelerationStructureToMemoryKHR', 'vkCopyMemoryToAccelerationStructureKHR', 'vkWriteAccelerationStructuresPropertiesKHR', 'vkGetRayTracingCaptureReplayShaderGroupHandlesKHR', 'vkGetDeviceAccelerationStructureCompatibilityKHR', 'vkGetAccelerationStructureBuildSizesKHR', 'vkCreateDeferredOperationKHR', 'vkGetMicromapBuildSizesEXT', 'vkCreateMicromapEXT', 'vkCopyMemoryToMicromapEXT', 'vkCopyMicromapToMemoryEXT', 'vkBuildMicromapsEXT', 'vkCopyMicromapEXT', 'vkDestroyMicromapEXT', 'vkWriteMicromapsPropertiesEXT', 'vkGetDeviceMicromapCompatibilityEXT', 'vkGetDeviceBufferMemoryRequirements', 'vkGetDeviceImageMemoryRequirements', 'vkGetDeviceImageSparseMemoryRequirements', 'vkSetDeviceMemoryPriorityEXT', 'vkGetDeviceFaultInfoEXT', 'vkCreatePipelineBinariesKHR', 'vkDestroyPipelineBinaryKHR', 'vkGetPipelineKeyKHR', 'vkGetPipelineBinaryDataKHR', 'vkReleaseCapturedPipelineDataKHR', 'vkGetDeviceImageSubresourceLayout', 'vkGetImageSubresourceLayout2', 'vkGetGeneratedCommandsMemoryRequirementsNV', 'vkCreateIndirectCommandsLayoutNV', 'vkDestroyIndirectCommandsLayoutNV', 'vkCreateIndirectCommandsLayoutEXT', 'vkCreateIndirectExecutionSetEXT', 'vkDestroyIndirectCommandsLayoutEXT', 'vkDestroyIndirectExecutionSetEXT', 'vkGetGeneratedCommandsMemoryRequirementsEXT', 'vkUpdateIndirectExecutionSetPipelineEXT', 'vkUpdateIndirectExecutionSetShaderEXT'
+            ],
+            'dispatch': 
+            [
+                'vkGetInstanceProcAddr', 'vkGetPhysicalDeviceProcAddr', 'vkGetDeviceProcAddr'
+            ],
+            'event': 
+            [
+                'vkDestroyEvent', 'vkGetEventStatus', 'vkSetEvent', 'vkResetEvent'
+            ],
+            'fence': 
+            [
+                'vkGetFenceStatus', 'vkDestroyFence', 'vkImportFenceFdKHR', 'vkGetFenceFdKHR'
+            ],
+            'framebuffer': 
+            [
+                'vkDestroyFramebuffer'
+            ],
+            'gpa_session': 
+            [
+                'vkCreateGpaSessionAMD', 'vkDestroyGpaSessionAMD', 'vkCmdBeginGpaSessionAMD', 'vkCmdEndGpaSessionAMD', 'vkCmdBeginGpaSampleAMD', 'vkCmdEndGpaSampleAMD', 'vkGetGpaSessionStatusAMD', 'vkGetGpaSessionResultsAMD', 'vkResetGpaSessionAMD', 'vkCmdCopyGpaSessionResultsAMD'
+            ],
+            'image': 
+            [
+                'vkDestroyImage', 'vkBindImageMemory', 'vkGetImageMemoryRequirements', 'vkGetImageSparseMemoryRequirements', 'vkGetImageSubresourceLayout', 'vkGetImageMemoryRequirements2', 'vkGetImageSparseMemoryRequirements2', 'vkGetImageDrmFormatModifierPropertiesEXT', 'vkCopyImageToImage', 'vkCopyImageToMemory', 'vkCopyMemoryToImage', 'vkTransitionImageLayout'
+            ],
+            'image_view': 
+            [
+                'vkDestroyImageView'
+            ],
+            'instance': 
+            [
+                'vkEnumerateInstanceVersion', 'vkCreateInstance', 'vkDestroyInstance', 'vkEnumeratePhysicalDevices', 'vkEnumeratePhysicalDeviceGroups', 'vkEnumerateInstanceExtensionProperties', 'vkEnumerateInstanceLayerProperties'
+            ],
+            'memory': 
+            [
+                'vkFreeMemory', 'vkMapMemory', 'vkUnmapMemory', 'vkMapMemory2', 'vkUnmapMemory2', 'vkFlushMappedMemoryRanges', 'vkInvalidateMappedMemoryRanges', 'vkGetDeviceMemoryCommitment', 'vkGetMemoryFdKHR', 'vkGetMemoryFdPropertiesKHR', 'vkGetDeviceMemoryOpaqueCaptureAddress'
+            ],
+            'physical_device': 
+            [
+                'vkCreateDevice', 'vkEnumerateDeviceExtensionProperties', 'vkGetPhysicalDeviceFeatures', 'vkGetPhysicalDeviceProperties', 'vkGetPhysicalDeviceImageFormatProperties', 'vkGetPhysicalDeviceFormatProperties', 'vkEnumerateDeviceLayerProperties', 'vkGetPhysicalDeviceMemoryProperties', 'vkGetPhysicalDeviceQueueFamilyProperties', 'vkGetPhysicalDeviceSparseImageFormatProperties', 'vkGetPhysicalDeviceSurfaceSupportKHR', 'vkGetPhysicalDeviceSurfacePresentModesKHR', 'vkGetPhysicalDeviceSurfaceCapabilitiesKHR', 'vkGetPhysicalDeviceSurfaceCapabilities2KHR', 'vkGetPhysicalDeviceSurfaceFormatsKHR', 'vkGetPhysicalDeviceSurfaceFormats2KHR', 'vkGetPhysicalDeviceFeatures2', 'vkGetPhysicalDeviceProperties2', 'vkGetPhysicalDeviceFormatProperties2', 'vkGetPhysicalDeviceImageFormatProperties2', 'vkGetPhysicalDeviceMultisamplePropertiesEXT', 'vkGetPhysicalDeviceQueueFamilyProperties2', 'vkGetPhysicalDeviceMemoryProperties2', 'vkGetPhysicalDeviceSparseImageFormatProperties2', 'vkGetPhysicalDeviceExternalBufferProperties', 'vkGetPhysicalDeviceExternalSemaphoreProperties', 'vkGetPhysicalDeviceExternalFenceProperties', 'vkGetPhysicalDeviceXcbPresentationSupportKHR', 'vkGetPhysicalDeviceXlibPresentationSupportKHR', 'vkGetPhysicalDeviceWaylandPresentationSupportKHR', 'vkAcquireXlibDisplayEXT', 'vkGetRandROutputDisplayEXT', 'vkReleaseDisplayEXT', 'vkGetPhysicalDevicePresentRectanglesKHR', 'vkGetPhysicalDeviceDisplayPropertiesKHR', 'vkGetPhysicalDeviceDisplayPlanePropertiesKHR', 'vkGetDisplayPlaneSupportedDisplaysKHR', 'vkGetDisplayModePropertiesKHR', 'vkCreateDisplayModeKHR', 'vkGetDisplayPlaneCapabilitiesKHR', 'vkGetPhysicalDeviceDisplayProperties2KHR', 'vkGetPhysicalDeviceDisplayPlaneProperties2KHR', 'vkGetDisplayModeProperties2KHR', 'vkGetDisplayPlaneCapabilities2KHR', 'vkGetPhysicalDeviceSurfaceCapabilities2EXT', 'vkGetPhysicalDeviceCalibrateableTimeDomainsEXT', 'vkGetPhysicalDeviceToolProperties', 'vkGetPhysicalDeviceFragmentShadingRatesKHR', 'vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR'
+            ],
+            'pipeline': 
+            [
+                'vkDestroyPipeline', 'vkGetShaderInfoAMD', 'vkGetPipelineExecutablePropertiesKHR', 'vkGetPipelineExecutableStatisticsKHR', 'vkGetPipelineExecutableInternalRepresentationsKHR', 'vkGetPipelineIndirectDeviceAddressNV', 'vkGetPipelineIndirectMemoryRequirementsNV'
+            ],
+            'pipeline_cache': 
+            [
+                'vkDestroyPipelineCache', 'vkGetPipelineCacheData', 'vkMergePipelineCaches'
+            ],
+            'pipeline_layout': 
+            [
+                'vkDestroyPipelineLayout'
+            ],
+            'private_data_slot': 
+            [
+                'vkCreatePrivateDataSlot', 'vkDestroyPrivateDataSlot', 'vkSetPrivateData', 'vkGetPrivateData'
+            ],
+            'query': 
+            [
+                'vkGetQueryPoolResults', 'vkDestroyQueryPool', 'vkResetQueryPool'
+            ],
+            'queue': 
+            [
+                'vkQueueSubmit', 'vkQueueSubmit2', 'vkQueueWaitIdle', 'vkQueueBindSparse', 'vkQueuePresentKHR', 'vkQueueBeginDebugUtilsLabelEXT', 'vkQueueEndDebugUtilsLabelEXT', 'vkQueueInsertDebugUtilsLabelEXT'
+            ],
+            'render_pass': 
+            [
+                'vkDestroyRenderPass'
+            ],
+            'sampler': 
+            [
+                'vkDestroySampler'
+            ],
+            'sampler_ycbcr_conversion': 
+            [
+                'vkDestroySamplerYcbcrConversion'
+            ],
+            'semaphore': 
+            [
+                'vkDestroySemaphore', 'vkGetSemaphoreFdKHR'
+            ],
+            'shader': 
+            [
+                'vkDestroyShaderModule', 'vkGetShaderModuleIdentifierEXT', 'vkGetShaderModuleCreateInfoIdentifierEXT'
+            ],
+            'surface': 
+            [
+                'vkCreateXcbSurfaceKHR', 'vkCreateXlibSurfaceKHR', 'vkCreateWaylandSurfaceKHR', 'vkCreateDisplayPlaneSurfaceKHR', 'vkDestroySurfaceKHR'
+            ],
+            'swapchain': 
+            [
+                'vkDestroySwapchainKHR', 'vkGetSwapchainImagesKHR', 'vkAcquireNextImageKHR', 'vkAcquireNextImage2KHR', 'vkSetHdrMetadataEXT'
+            ],
+        }
     
     def _get_object_type_from_command(self, command: Command) -> str:
         """Determine object type from command based on function name patterns."""
@@ -204,21 +567,38 @@ class EntryPointGenerator:
         method_name = self.type_mapper.get_method_name(command.name)
         
         # Build basic context
+        # For global functions (no handle), don't skip first parameter
+        skip_first_param = first_handle is not None
+        
         context = {
             'function_name': command.name,
             'return_type': command.return_type,
             'parameters': self.type_mapper.format_parameter_list(command.parameters),
             'method_name': method_name,
-            'method_params': self.type_mapper.format_method_parameters(command.parameters)
+            'method_params': self.type_mapper.format_method_parameters(command.parameters, skip_first=skip_first_param)
         }
         
         # Add destroy function specific context
-        if command.name.startswith('vkDestroy') and len(command.parameters) >= 3:
+        is_destroy_function = command.name.startswith('vkDestroy') and len(command.parameters) >= 2
+        if is_destroy_function:
             context.update(self._build_destroy_context(command))
         
-        # Add function body
-        if first_handle:
+        # Add function body (skip handle context for destroy functions as destroy context is more specific)
+        if first_handle and not is_destroy_function:
             context.update(self._build_handle_context(command, first_handle))
+        
+        # Add allocator logic for functions with allocator parameters (but not destroy functions or global functions)
+        if not is_destroy_function and first_handle:
+            allocator_param = self._find_allocator_parameter(command)
+            if allocator_param:
+                context['allocator_logic'] = self.template_engine.render_allocator_logic(allocator_param.name)
+                # Replace allocator parameter with pAllocCB in method parameters
+                context['method_params'] = self._format_method_parameters_with_allocator(command.parameters, allocator_param.name, skip_first=skip_first_param)
+            else:
+                context['allocator_logic'] = ''
+        elif not is_destroy_function:
+            # Global functions - no allocator logic needed
+            context['allocator_logic'] = ''
         
         function_body = self.template_engine.render_function_body(context)
         context['function_body'] = function_body
@@ -227,19 +607,51 @@ class EntryPointGenerator:
     
     def _build_destroy_context(self, command: Command) -> Dict[str, str]:
         """Build context for destroy functions."""
-        # Destroy functions typically have: (device, handle, allocator)
-        device_param = command.parameters[0]  # First param is usually device
-        handle_param = command.parameters[1]  # Second param is the object being destroyed
-        allocator_param = command.parameters[2]  # Third param is allocator
-        
-        context = {
-            'device_param': device_param.name,
-            'handle_param': handle_param.name,
-            'allocator_param': allocator_param.name,
-            'object_type': self.type_mapper.get_xgl_type(handle_param.type_name)
-        }
+        if len(command.parameters) == 2:
+            # 2-parameter destroy functions: (handle, allocator) - handle destroys itself
+            # Examples: vkDestroyInstance, vkDestroyDevice
+            handle_param = command.parameters[0]  # The object being destroyed
+            allocator_param = command.parameters[1]  # Allocator
+            
+            context = {
+                'device_param': handle_param.name,  # Use the handle as device param for these functions
+                'handle_param': handle_param.name,
+                'allocator_param': allocator_param.name,
+                'object_type': self.type_mapper.get_xgl_type(handle_param.type_name)
+            }
+        else:
+            # 3-parameter destroy functions: (device, handle, allocator)
+            device_param = command.parameters[0]  # First param is usually device
+            handle_param = command.parameters[1]  # Second param is the object being destroyed
+            allocator_param = command.parameters[2]  # Third param is allocator
+            
+            context = {
+                'device_param': device_param.name,
+                'handle_param': handle_param.name,
+                'allocator_param': allocator_param.name,
+                'object_type': self.type_mapper.get_xgl_type(handle_param.type_name)
+            }
         
         return context
+    
+    def _find_allocator_parameter(self, command: Command):
+        """Find the allocator callback parameter in a command."""
+        for param in command.parameters:
+            if 'VkAllocationCallbacks' in param.type_name and param.is_pointer:
+                return param
+        return None
+    
+    def _format_method_parameters_with_allocator(self, parameters, allocator_param_name: str, skip_first: bool = True) -> str:
+        """Format method parameters, replacing allocator parameter with pAllocCB."""
+        # Skip first parameter (handle) for non-global functions and replace allocator with pAllocCB
+        params_to_use = parameters[1:] if skip_first else parameters
+        param_names = []
+        for param in params_to_use:
+            if param.name == allocator_param_name:
+                param_names.append('pAllocCB')
+            else:
+                param_names.append(param.name)
+        return ", ".join(param_names)
     
     def _build_handle_context(self, command: Command, handle_param) -> Dict[str, str]:
         """Build context for handle-based functions."""

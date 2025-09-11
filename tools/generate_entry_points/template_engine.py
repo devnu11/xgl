@@ -72,17 +72,20 @@ $parameters)
 
     DEVICE_FUNCTION_BODY = CodeTemplate("""
     Device* pDevice = ApiDevice::ObjectFromHandle($handle_param);
-    $allocator_logic
+$allocator_logic
     return pDevice->$method_name($method_params);""")
 
     INSTANCE_FUNCTION_BODY = CodeTemplate("""
     Instance* pInstance = ApiInstance::ObjectFromHandle($handle_param);
-    $allocator_logic
+$allocator_logic
     return pInstance->$method_name($method_params);""")
 
     SIMPLE_FUNCTION_BODY = CodeTemplate("""
     $object_type* pObject = Api$object_type::ObjectFromHandle($handle_param);
     return pObject->$method_name($method_params);""")
+
+    DIRECT_FUNCTION_BODY = CodeTemplate("""
+    return Api$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
 
     VOID_FUNCTION_BODY = CodeTemplate("""
     Api$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
@@ -90,7 +93,7 @@ $parameters)
     GLOBAL_FUNCTION_BODY = CodeTemplate("""
     return $method_name($method_params);""")
 
-    ALLOCATOR_LOGIC = CodeTemplate("""const VkAllocationCallbacks* pAllocCB = $allocator_param ? $allocator_param : pDevice->VkInstance()->GetAllocCallbacks();""")
+    ALLOCATOR_LOGIC = CodeTemplate("""    const VkAllocationCallbacks* pAllocCB = $allocator_param ? $allocator_param : pDevice->VkInstance()->GetAllocCallbacks();""")
 
     DESTROY_FUNCTION_BODY = CodeTemplate("""
     if ($handle_param != VK_NULL_HANDLE)
@@ -99,6 +102,12 @@ $parameters)
         const VkAllocationCallbacks* pAllocCB = $allocator_param ? $allocator_param : pDevice->VkInstance()->GetAllocCallbacks();
 
         $object_type::ObjectFromHandle($handle_param)->Destroy(pDevice, pAllocCB);
+    }""")
+
+    SELF_DESTROY_FUNCTION_BODY = CodeTemplate("""
+    if ($handle_param != VK_NULL_HANDLE)
+    {
+        $object_type::ObjectFromHandle($handle_param)->Destroy();
     }""")
 
 
@@ -127,7 +136,11 @@ class TemplateEngine:
         
         # Check if this is a destroy function
         if function_name.startswith('vkDestroy') and context.get('return_type') == 'void':
-            return self.repo.DESTROY_FUNCTION_BODY.render(**context)
+            # Check if this is a self-destroy function (vkDestroyInstance, vkDestroyDevice)
+            if function_name in ['vkDestroyInstance', 'vkDestroyDevice']:
+                return self.repo.SELF_DESTROY_FUNCTION_BODY.render(**context)
+            else:
+                return self.repo.DESTROY_FUNCTION_BODY.render(**context)
         elif function_type == 'device':
             return self.repo.DEVICE_FUNCTION_BODY.render(**context)
         elif function_type == 'instance':
@@ -137,7 +150,11 @@ class TemplateEngine:
         elif context.get('return_type') == 'void' and context.get('handle_param'):
             return self.repo.VOID_FUNCTION_BODY.render(**context)
         elif context.get('handle_param'):
-            return self.repo.SIMPLE_FUNCTION_BODY.render(**context)
+            # Use direct template for non-void functions without allocator logic
+            if context.get('allocator_logic') == '':
+                return self.repo.DIRECT_FUNCTION_BODY.render(**context)
+            else:
+                return self.repo.SIMPLE_FUNCTION_BODY.render(**context)
         else:
             # Global function with no handle
             return self.repo.GLOBAL_FUNCTION_BODY.render(**context)

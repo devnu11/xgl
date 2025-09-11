@@ -55,10 +55,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkWaitForFences(
     VkBool32                                    waitAll,
     uint64_t                                    timeout)
 {
-     return ApiDevice::ObjectFromHandle(device)->WaitForFences(fenceCount,
-                                                              pFences,
-                                                              waitAll,
-                                                              timeout);
+     return ApiDevice::ObjectFromHandle(device)->WaitForFences(fenceCount, pFences, waitAll, timeout);
 }
 
 // =====================================================================================================================

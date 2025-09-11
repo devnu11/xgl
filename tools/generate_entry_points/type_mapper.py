@@ -7,25 +7,11 @@ from xml_parser import Parameter, Command
 class TypeMapper:
     """Maps Vulkan types to XGL equivalents and generates conversions."""
     
-    # Vulkan handles that map to XGL object types
+    # Special cases that don't follow the simple "strip Vk prefix" rule
     HANDLE_MAPPINGS: Dict[str, str] = {
-        'VkDevice': 'Device',
-        'VkInstance': 'Instance', 
-        'VkPhysicalDevice': 'PhysicalDevice',
-        'VkQueue': 'Queue',
-        'VkBuffer': 'Buffer',
-        'VkImage': 'Image',
-        'VkPipeline': 'Pipeline',
         'VkCommandBuffer': 'CmdBuffer',
-        'VkRenderPass': 'RenderPass',
-        'VkFramebuffer': 'Framebuffer',
-        'VkShaderModule': 'ShaderModule',
-        'VkSampler': 'Sampler',
-        'VkDescriptorSet': 'DescriptorSet',
-        'VkDescriptorPool': 'DescriptorPool',
-        'VkFence': 'Fence',
-        'VkSemaphore': 'Semaphore',
-        'VkEvent': 'Event'
+        'VkCommandPool': 'CmdPool',
+        'VkSurfaceKHR': 'Surface'
     }
     
     # Functions that need allocator callback handling
@@ -40,7 +26,15 @@ class TypeMapper:
     
     def get_xgl_type(self, vk_type: str) -> str:
         """Map Vulkan type to XGL type."""
-        return self.HANDLE_MAPPINGS.get(vk_type, vk_type)
+        # Check for explicit mapping first
+        if vk_type in self.HANDLE_MAPPINGS:
+            vk_type = self.HANDLE_MAPPINGS[vk_type]
+        
+        # Default: strip 'Vk' prefix if present
+        elif vk_type.startswith('Vk'):
+            vk_type = vk_type[2:]  # Remove 'Vk' prefix
+        
+        return vk_type
     
     def get_object_from_handle_call(self, vk_type: str) -> str:
         """Generate ObjectFromHandle call for given type."""
