@@ -27,7 +27,8 @@ class EntryPointGenerator:
     def enable_verbose(self) -> None:
         """Enable verbose logging."""
         self.verbose = True
-        logging.basicConfig(level=logging.INFO)
+        # Reconfigure logging to INFO level for verbose mode
+        logging.getLogger().setLevel(logging.INFO)
     
     def generate(self) -> None:
         """Generate all entry point files."""
