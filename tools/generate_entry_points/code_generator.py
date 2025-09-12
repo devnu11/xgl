@@ -270,6 +270,13 @@ class EntryPointGenerator:
                     {'name': 'vkAllocateDescriptorSets', 'impl': 'entry_points'}
                 ]
             },
+            'instance': {
+                'functions': [
+                    {'name': 'vkEnumerateInstanceVersion', 'impl': 'static_member_call', 'method': 'EnumerateVersion'},
+                    {'name': 'vkCreateInstance', 'impl': 'static_member_call', 'method': 'Create'},
+                    {'name': 'vkEnumerateInstanceExtensionProperties', 'impl': 'static_member_call', 'method': 'EnumerateExtensionProperties'}
+                ]
+            },
 
         }
     
@@ -759,6 +766,16 @@ class EntryPointGenerator:
         # Add function body (skip handle context for destroy functions as destroy context is more specific)
         if first_handle and not is_destroy_function:
             context.update(self._build_handle_context(command, first_handle))
+        
+        # For static member calls, we need the object_type even for global functions
+        if impl_type == 'static_member_call':
+            # For static calls, determine the class name from the function name or explicit mapping
+            if command.name.startswith('vkCreateInstance') or command.name.startswith('vkEnumerateInstance'):
+                context['object_type'] = 'Instance'
+            elif first_handle:
+                context['object_type'] = self.type_mapper.get_xgl_type(first_handle.type_name)
+            else:
+                context['object_type'] = 'Instance'  # Default for global instance functions
         
         # Add allocator logic for functions with allocator parameters (but not destroy functions or global functions)
         if not is_destroy_function and first_handle:

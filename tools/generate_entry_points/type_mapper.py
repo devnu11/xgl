@@ -14,6 +14,28 @@ class TypeMapper:
         'VkSurfaceKHR': 'Surface'
     }
     
+    # Classes that use the Api prefix
+    API_PREFIX_CLASSES: Set[str] = {
+        'CmdBuffer',
+        'Device',
+        'HwShaderMapping',
+        'PhysicalDevice',
+        'Queue',
+        'ShaderFromHwShader',
+        'ShaderStageCompute',
+        'ShaderStageDomain',
+        'ShaderStageGeometry',
+        'ShaderStageHull',
+        'ShaderStageMesh',
+        'ShaderStagePixel',
+        'ShaderStageTask',
+        'ShaderStageVertex',
+        'ShaderType',
+        'StageNames',
+        'String',
+        'Version'
+    }
+    
     # Functions that need allocator callback handling
     ALLOCATOR_FUNCTIONS: Set[str] = {
         'vkCreateBuffer', 'vkCreateImage', 'vkCreateFence', 
@@ -39,7 +61,8 @@ class TypeMapper:
     def get_object_from_handle_call(self, vk_type: str) -> str:
         """Generate ObjectFromHandle call for given type."""
         xgl_type = self.get_xgl_type(vk_type)
-        return f"Api{xgl_type}::ObjectFromHandle"
+        prefix = "Api" if xgl_type in self.API_PREFIX_CLASSES else ""
+        return f"{prefix}{xgl_type}::ObjectFromHandle"
     
     def get_method_name(self, function_name: str) -> str:
         """Convert Vulkan function name to XGL method name."""

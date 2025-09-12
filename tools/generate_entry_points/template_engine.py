@@ -71,24 +71,24 @@ $parameters)
 }""")
 
     DEVICE_FUNCTION_BODY = CodeTemplate("""
-    Device* pDevice = ApiDevice::ObjectFromHandle($handle_param);
+    Device* pDevice = $api_prefix$object_type::ObjectFromHandle($handle_param);
 $allocator_logic
     return pDevice->$method_name($method_params);""")
 
     INSTANCE_FUNCTION_BODY = CodeTemplate("""
-    Instance* pInstance = ApiInstance::ObjectFromHandle($handle_param);
+    Instance* pInstance = $api_prefix$object_type::ObjectFromHandle($handle_param);
 $allocator_logic
     return pInstance->$method_name($method_params);""")
 
     SIMPLE_FUNCTION_BODY = CodeTemplate("""
-    $object_type* pObject = Api$object_type::ObjectFromHandle($handle_param);
+    $object_type* pObject = $api_prefix$object_type::ObjectFromHandle($handle_param);
     return pObject->$method_name($method_params);""")
 
     DIRECT_FUNCTION_BODY = CodeTemplate("""
-    return Api$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
+    return $api_prefix$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
 
     VOID_FUNCTION_BODY = CodeTemplate("""
-    Api$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
+    $api_prefix$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
     
     GLOBAL_FUNCTION_BODY = CodeTemplate("""
     return $method_name($method_params);""")
@@ -139,6 +139,10 @@ $remaining_implementation""")
     # Template for cmd_buffer GetEntryPoints() pattern
     CMD_BUFFER_ENTRY_POINTS_BODY = CodeTemplate("""
     ${return_statement}ApiCmdBuffer::ObjectFromHandle($handle_param)->VkDevice()->GetEntryPoints().$function_name($entry_points_params);""")
+
+    # Template for static member calls (e.g. Instance::Create, Instance::EnumerateVersion)
+    STATIC_MEMBER_CALL_BODY = CodeTemplate("""
+    ${return_statement}$object_type::$method_name($method_params);""")
 
 
 class TemplateEngine:
@@ -197,6 +201,10 @@ class TemplateEngine:
             # Add return statement with space for non-void functions, empty for void
             context['return_statement'] = '' if context.get('return_type') == 'void' else 'return '
             return self.repo.CMD_BUFFER_ENTRY_POINTS_BODY.render(**context)
+        elif impl_type == 'static_member_call':
+            # Add return statement with space for non-void functions, empty for void
+            context['return_statement'] = '' if context.get('return_type') == 'void' else 'return '
+            return self.repo.STATIC_MEMBER_CALL_BODY.render(**context)
         
         elif impl_type == 'inline':
             # For simple implementations, we might have inline code or use existing simple logic
@@ -212,6 +220,13 @@ class TemplateEngine:
             else:
                 return self.repo.DESTROY_FUNCTION_BODY.render(**context)
         elif context.get('handle_param') and impl_type == 'standard':
+            # Add Api prefix based on object type
+            object_type = context.get('object_type', '')
+            # Import TypeMapper to check API_PREFIX_CLASSES
+            from type_mapper import TypeMapper
+            tm = TypeMapper()
+            context['api_prefix'] = 'Api' if object_type in tm.API_PREFIX_CLASSES else ''
+            
             # Handle-based functions - use direct/void templates for simple cases
             if context.get('return_type') == 'void' and context.get('allocator_logic') == '':
                 return self.repo.VOID_FUNCTION_BODY.render(**context)
