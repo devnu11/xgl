@@ -81,24 +81,54 @@ class EntryPointGenerator:
     def _group_commands_by_object_type(self, commands: Dict[str, Command]) -> Dict[str, List[Command]]:
         """Group commands by explicit file mappings, preserving the order specified in mappings."""
         file_mappings = self._get_file_mappings()
+        enhanced_mappings = self._get_enhanced_file_mappings()
         
         groups: Dict[str, List[Command]] = {}
         unmapped_functions = []
         
         # Iterate through file mappings in order to preserve function ordering
-        for file_name, func_list in file_mappings.items():
+        for file_name, mapping_data in file_mappings.items():
             groups[file_name] = []
-            for func_name in func_list:
+            
+            # Build a map of enhanced functions for quick lookup
+            enhanced_functions = {}
+            if file_name in enhanced_mappings:
+                for func_entry in enhanced_mappings[file_name]['functions']:
+                    enhanced_functions[func_entry['name']] = func_entry
+            
+            # Process all functions from the old format, applying enhanced metadata where available
+            func_list = mapping_data if isinstance(mapping_data, list) else mapping_data.get('functions', [])
+            for func_entry in func_list:
+                func_name = func_entry if isinstance(func_entry, str) else func_entry.get('name')
                 if func_name in commands:
-                    groups[file_name].append(commands[func_name])
-                else:
-                    # Function is mapped but not found in commands (filtered out or doesn't exist)
-                    pass
+                    command = commands[func_name]
+                    
+                    # Check if we have enhanced metadata for this function
+                    if func_name in enhanced_functions:
+                        enhanced_entry = enhanced_functions[func_name]
+                        command.impl_type = enhanced_entry.get('impl', 'standard')
+                        command.impl_method = enhanced_entry.get('method')
+                        command.impl_return = enhanced_entry.get('return')
+                    else:
+                        # Set default implementation type for functions without enhanced metadata
+                        command.impl_type = 'standard'
+                        command.impl_method = None
+                        command.impl_return = None
+                    
+                    groups[file_name].append(command)
         
         # Check for functions in commands that aren't mapped to any file
         mapped_functions = set()
-        for func_list in file_mappings.values():
-            mapped_functions.update(func_list)
+        for file_name, mapping_data in file_mappings.items():
+            if file_name in enhanced_mappings:
+                func_list = enhanced_mappings[file_name]['functions']
+                for func_entry in func_list:
+                    mapped_functions.add(func_entry['name'])
+            else:
+                func_list = mapping_data if isinstance(mapping_data, list) else mapping_data.get('functions', [])
+                for func_entry in func_list:
+                    func_name = func_entry if isinstance(func_entry, str) else func_entry.get('name')
+                    mapped_functions.add(func_name)
         
         for command in commands.values():
             if command.name not in mapped_functions:
@@ -113,8 +143,62 @@ class EntryPointGenerator:
         
         return groups
     
-    def _get_file_mappings(self) -> Dict[str, List[str]]:
-        """Get explicit mapping of file names to lists of function names."""
+    def _get_enhanced_file_mappings(self) -> Dict[str, Dict[str, any]]:
+        """Get enhanced mapping with implementation metadata for select files."""
+        return {
+            'buffer': {
+                'functions': [
+                    {'name': 'vkDestroyBuffer', 'impl': 'standard', 'method': 'Destroy'},
+                    {'name': 'vkBindBufferMemory', 'impl': 'standard', 'method': 'BindMemory'},
+                    {'name': 'vkGetBufferMemoryRequirements', 'impl': 'standard', 'method': 'GetMemoryRequirements'},
+                    {'name': 'vkGetBufferMemoryRequirements2', 'impl': 'standard', 'method': 'GetMemoryRequirements'},
+                    {'name': 'vkGetBufferDeviceAddress', 'impl': 'standard', 'method': 'GpuVirtAddr'},
+                    {'name': 'vkGetBufferOpaqueCaptureAddress', 'impl': 'standard', 'method': 'GpuVirtAddr'}
+                ]
+            },
+            'buffer_view': {
+                'functions': [
+                    {'name': 'vkDestroyBufferView', 'impl': 'standard', 'method': 'Destroy'}
+                ]
+            },
+            'descriptor_buffer': {
+                'functions': [
+                    {'name': 'vkGetDescriptorSetLayoutSizeEXT', 'impl': 'simple'},
+                    {'name': 'vkGetDescriptorSetLayoutBindingOffsetEXT', 'impl': 'simple'},
+                    {'name': 'vkGetDescriptorEXT', 'impl': 'simple'},
+                    {'name': 'vkGetBufferOpaqueCaptureDescriptorDataEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
+                    {'name': 'vkGetImageOpaqueCaptureDescriptorDataEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
+                    {'name': 'vkGetImageViewOpaqueCaptureDescriptorDataEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
+                    {'name': 'vkGetSamplerOpaqueCaptureDescriptorDataEXT', 'impl': 'simple'},
+                    {'name': 'vkGetAccelerationStructureOpaqueCaptureDescriptorDataEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'}
+                ]
+            },
+            'cmd_buffer': {
+                'functions': [
+                    # Examples of different patterns found in cmd_buffer
+                    {'name': 'vkBeginCommandBuffer', 'impl': 'standard', 'method': 'Begin'},
+                    {'name': 'vkEndCommandBuffer', 'impl': 'standard', 'method': 'End'},
+                    {'name': 'vkResetCommandBuffer', 'impl': 'standard', 'method': 'Reset'},
+                    {'name': 'vkCmdBindPipelineShaderGroupNV', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdUpdatePipelineIndirectBufferNV', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdPreprocessGeneratedCommandsEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdExecuteGeneratedCommandsEXT', 'impl': 'not_implemented'},
+                    # Add more as needed...
+                ]
+            },
+            'image': {
+                'functions': [
+                    {'name': 'vkDestroyImage', 'impl': 'standard', 'method': 'Destroy'},
+                    {'name': 'vkCopyImageToImage', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'},
+                    {'name': 'vkCopyImageToMemory', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'},
+                    {'name': 'vkCopyMemoryToImage', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'},
+                    {'name': 'vkTransitionImageLayout', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'}
+                ]
+            }
+        }
+    
+    def _get_file_mappings(self) -> Dict[str, Dict[str, any]]:
+        """Get explicit mapping of file names to function details with implementation metadata."""
         return {
             'buffer': 
             [
@@ -564,7 +648,14 @@ class EntryPointGenerator:
     def _build_function_context(self, command: Command) -> Dict[str, str]:
         """Build template context for function generation."""
         first_handle = command.get_first_handle_param()
-        method_name = self.type_mapper.get_method_name(command.name)
+        
+        # Get implementation metadata from enhanced mappings
+        impl_type = getattr(command, 'impl_type', 'standard')
+        impl_method = getattr(command, 'impl_method', None)
+        impl_return = getattr(command, 'impl_return', None)
+        
+        # Use impl_method if specified, otherwise fall back to type mapper
+        method_name = impl_method if impl_method else self.type_mapper.get_method_name(command.name)
         
         # Build basic context
         # For global functions (no handle), don't skip first parameter
@@ -575,7 +666,11 @@ class EntryPointGenerator:
             'return_type': command.return_type,
             'parameters': self.type_mapper.format_parameter_list(command.parameters),
             'method_name': method_name,
-            'method_params': self.type_mapper.format_method_parameters(command.parameters, skip_first=skip_first_param)
+            'method_params': self.type_mapper.format_method_parameters(command.parameters, skip_first=skip_first_param),
+            # Add implementation metadata from enhanced mappings
+            'impl_type': impl_type,
+            'impl_method': impl_method,
+            'impl_return': impl_return
         }
         
         # Add destroy function specific context

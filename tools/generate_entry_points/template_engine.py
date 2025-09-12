@@ -110,6 +110,26 @@ $allocator_logic
         $object_type::ObjectFromHandle($handle_param)->Destroy();
     }""")
 
+    # Templates for new implementation types
+    SUCCESS_ONLY_FUNCTION_BODY = CodeTemplate("""
+    // Stub implementation - returns success
+    return $return_value;""")
+
+    NOT_IMPLEMENTED_FUNCTION_BODY = CodeTemplate("""
+    VK_NOT_IMPLEMENTED;""")
+
+    NOT_IMPLEMENTED_WITH_RETURN_BODY = CodeTemplate("""
+    VK_NOT_IMPLEMENTED;
+    return $return_value;""")
+
+    SIMPLE_INLINE_BODY = CodeTemplate("""
+    // Simple inline implementation
+$inline_implementation""")
+
+    ASSERTION_BODY = CodeTemplate("""
+    VK_ASSERT($assertion_condition);
+$remaining_implementation""")
+
 
 class TemplateEngine:
     """Engine for rendering C++ code templates."""
@@ -133,15 +153,32 @@ class TemplateEngine:
         """Render function body based on context."""
         function_type = context.get('function_type', 'simple')
         function_name = context.get('function_name', '')
+        impl_type = context.get('impl_type', 'standard')
         
-        # Check if this is a destroy function
-        if function_name.startswith('vkDestroy') and context.get('return_type') == 'void':
+        # Handle new implementation types first
+        if impl_type == 'success_only':
+            return_value = context.get('impl_return', 'VK_SUCCESS')
+            return self.repo.SUCCESS_ONLY_FUNCTION_BODY.render(return_value=return_value)
+        elif impl_type == 'not_implemented':
+            return_value = context.get('impl_return')
+            if return_value and return_value != 'void':
+                return self.repo.NOT_IMPLEMENTED_WITH_RETURN_BODY.render(return_value=return_value)
+            else:
+                return self.repo.NOT_IMPLEMENTED_FUNCTION_BODY.render(**context)
+        elif impl_type == 'simple':
+            # For simple implementations, we might have inline code or use existing simple logic
+            if context.get('inline_implementation'):
+                return self.repo.SIMPLE_INLINE_BODY.render(**context)
+            # Fall through to existing logic for simple implementations
+        
+        # Check if this is a destroy function (legacy logic)
+        if function_name.startswith('vkDestroy') and context.get('return_type') == 'void' and impl_type == 'standard':
             # Check if this is a self-destroy function (vkDestroyInstance, vkDestroyDevice)
             if function_name in ['vkDestroyInstance', 'vkDestroyDevice']:
                 return self.repo.SELF_DESTROY_FUNCTION_BODY.render(**context)
             else:
                 return self.repo.DESTROY_FUNCTION_BODY.render(**context)
-        elif context.get('handle_param'):
+        elif context.get('handle_param') and impl_type == 'standard':
             # Handle-based functions - use direct/void templates for simple cases
             if context.get('return_type') == 'void' and context.get('allocator_logic') == '':
                 return self.repo.VOID_FUNCTION_BODY.render(**context)
@@ -153,7 +190,7 @@ class TemplateEngine:
                 return self.repo.INSTANCE_FUNCTION_BODY.render(**context)
             else:
                 return self.repo.SIMPLE_FUNCTION_BODY.render(**context)
-        elif function_type == 'global':
+        elif function_type == 'global' or impl_type == 'global':
             return self.repo.GLOBAL_FUNCTION_BODY.render(**context)
         else:
             # Global function with no handle
