@@ -14,7 +14,7 @@ Generates Vulkan API entry points from vk.xml registry automatically.
 
 ### Manual Generation
 ```bash
-python main.py --xml-path ../../icd/api/include/khronos/sdk-1.4/vulkan/vk.xml --output-dir generated/
+python main.py --xml-path ../../icd/api/include/khronos/sdk-1.4/vulkan/vk.xml --output-dir xgl/icd/api/entry/generated/ --verbose
 ```
 
 ### CMake Integration

@@ -28,7 +28,7 @@ def main():
         "--output-dir",
         required=False,
         help="Output directory for generated files",
-        default=api_path / "entry"
+        default=api_path / "entry" / "generated"
     )
     parser.add_argument(
         "--verbose",
