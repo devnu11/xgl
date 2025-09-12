@@ -44,7 +44,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateFence(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateFence(pCreateInfo, pAllocCB, pFence);
+    return pDevice->CreateFence(
+		pCreateInfo,
+		pAllocCB,
+		pFence);
 }
 
 // =====================================================================================================================
@@ -55,7 +58,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkWaitForFences(
     VkBool32                                    waitAll,
     uint64_t                                    timeout)
 {
-     return ApiDevice::ObjectFromHandle(device)->WaitForFences(fenceCount, pFences, waitAll, timeout);
+     return ApiDevice::ObjectFromHandle(device)->WaitForFences(
+	 	fenceCount,
+	 	pFences,
+		waitAll,
+		timeout);
 }
 
 // =====================================================================================================================
@@ -74,7 +81,10 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue(
     uint32_t                                    queueIndex,
     VkQueue*                                    pQueue)
 {
-    ApiDevice::ObjectFromHandle(device)->GetQueue(queueFamilyIndex, queueIndex, pQueue);
+    ApiDevice::ObjectFromHandle(device)->GetQueue(
+		queueFamilyIndex,
+		queueIndex,
+		pQueue);
 }
 
 // =====================================================================================================================
@@ -96,7 +106,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateSemaphore(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateSemaphore(pCreateInfo, pAllocCB, pSemaphore);
+    return pDevice->CreateSemaphore(
+		pCreateInfo,
+		pAllocCB,
+		pSemaphore);
 }
 
 // =====================================================================================================================
@@ -130,7 +143,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateEvent(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateEvent(pCreateInfo, pAllocCB, pEvent);
+    return pDevice->CreateEvent(
+		pCreateInfo,
+		pAllocCB,
+		pEvent);
 }
 
 // =====================================================================================================================
@@ -143,7 +159,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateQueryPool(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateQueryPool(pCreateInfo, pAllocCB, pQueryPool);
+    return pDevice->CreateQueryPool(
+		pCreateInfo,
+		pAllocCB,
+		pQueryPool);
 }
 
 // =====================================================================================================================
@@ -156,7 +175,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorSetLayout(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateDescriptorSetLayout(pCreateInfo, pAllocCB, pSetLayout);
+    return pDevice->CreateDescriptorSetLayout(
+		pCreateInfo,
+		pAllocCB,
+		pSetLayout);
 }
 
 // =====================================================================================================================
@@ -169,7 +191,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineLayout(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreatePipelineLayout(pCreateInfo, pAllocCB, pPipelineLayout);
+    return pDevice->CreatePipelineLayout(
+		pCreateInfo,
+		pAllocCB,
+		pPipelineLayout);
 }
 
 // =====================================================================================================================
@@ -182,7 +207,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateFramebuffer(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateFramebuffer(pCreateInfo, pAllocCB, pFramebuffer);
+    return pDevice->CreateFramebuffer(
+		pCreateInfo,
+		pAllocCB,
+		pFramebuffer);
 }
 
 // =====================================================================================================================
@@ -195,7 +223,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateRenderPass(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateRenderPass(pCreateInfo, pAllocCB, pRenderPass);
+    return pDevice->CreateRenderPass(
+		pCreateInfo,
+		pAllocCB,
+		pRenderPass);
 }
 
 // =====================================================================================================================
@@ -208,7 +239,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateRenderPass2(
     Device*                      pDevice = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateRenderPass2(pCreateInfo, pAllocCB, pRenderPass);
+    return pDevice->CreateRenderPass2(
+		pCreateInfo,
+		pAllocCB,
+		pRenderPass);
 }
 
 // =====================================================================================================================
@@ -221,7 +255,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateBuffer(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateBuffer(pCreateInfo, pAllocCB, pBuffer);
+    return pDevice->CreateBuffer(
+        pCreateInfo,
+        pAllocCB,
+        pBuffer);
 }
 
 // =====================================================================================================================
@@ -234,7 +271,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateBufferView(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateBufferView(pCreateInfo, pAllocCB, pView);
+    return pDevice->CreateBufferView(
+        pCreateInfo,
+        pAllocCB,
+        pView);
 }
 
 // =====================================================================================================================
@@ -247,7 +287,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateImage(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateImage(pCreateInfo, pAllocCB, pImage);
+    return pDevice->CreateImage(
+        pCreateInfo,
+        pAllocCB,
+        pImage);
 }
 
 // =====================================================================================================================
@@ -260,7 +303,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateImageView(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateImageView(pCreateInfo, pAllocCB, pView);
+    return pDevice->CreateImageView(
+        pCreateInfo,
+        pAllocCB,
+        pView);
 }
 
 // =====================================================================================================================
@@ -273,7 +319,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateShaderModule(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateShaderModule(pCreateInfo, pAllocCB, pShaderModule);
+    return pDevice->CreateShaderModule(
+        pCreateInfo,
+        pAllocCB,
+        pShaderModule);
 }
 
 // =====================================================================================================================
@@ -286,7 +335,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineCache(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreatePipelineCache(pCreateInfo, pAllocCB, pPipelineCache);
+    return pDevice->CreatePipelineCache(
+        pCreateInfo,
+        pAllocCB,
+        pPipelineCache);
 }
 
 // =====================================================================================================================
@@ -339,7 +391,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateSampler(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateSampler(pCreateInfo, pAllocCB, pSampler);
+    return pDevice->CreateSampler(
+        pCreateInfo,
+        pAllocCB,
+        pSampler);
 }
 
 // =====================================================================================================================
@@ -352,7 +407,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateSamplerYcbcrConversion(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateSamplerYcbcrConversion(pCreateInfo, pAllocCB, pYcbcrConversion);
+    return pDevice->CreateSamplerYcbcrConversion(
+        pCreateInfo,
+        pAllocCB,
+        pYcbcrConversion);
 }
 
 // =====================================================================================================================
@@ -365,7 +423,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateSwapchainKHR(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateSwapchain(pCreateInfo, pAllocCB, pSwapchain);
+    return pDevice->CreateSwapchain(
+        pCreateInfo,
+        pAllocCB,
+        pSwapchain);
 }
 
 // =====================================================================================================================
@@ -394,8 +455,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
     const VkCommandBufferAllocateInfo*          pAllocateInfo,
     VkCommandBuffer*                            pCommandBuffers)
 {
-    return ApiDevice::ObjectFromHandle(device)->AllocateCommandBuffers(pAllocateInfo,
-                                                                       pCommandBuffers);
+    return ApiDevice::ObjectFromHandle(device)->AllocateCommandBuffers(pAllocateInfo, pCommandBuffers);
 }
 
 // =====================================================================================================================
@@ -408,7 +468,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateCommandPool(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateCommandPool(pCreateInfo, pAllocCB, pCommandPool);
+    return pDevice->CreateCommandPool(
+        pCreateInfo,
+        pAllocCB,
+        pCommandPool);
 }
 
 // =====================================================================================================================
@@ -420,10 +483,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateMemory(
 {
     Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    const VkAllocationCallbacks* pAllocCB = (pAllocator != nullptr)
-                                            ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
-
-    return pDevice->AllocMemory(pAllocateInfo, pAllocCB, pMemory);
+    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
+    return pDevice->AllocMemory(
+        pAllocateInfo,
+        pAllocCB,
+        pMemory);
 }
 
 #if defined(__unix__)
@@ -472,7 +536,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorUpdateTemplate(
     Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateDescriptorUpdateTemplate(pCreateInfo, pAllocCB, pDescriptorUpdateTemplate);
+    return pDevice->CreateDescriptorUpdateTemplate(
+        pCreateInfo,
+        pAllocCB,
+        pDescriptorUpdateTemplate);
 }
 
 // =====================================================================================================================
@@ -763,9 +830,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetSemaphoreCounterValue(
     VkSemaphore                                 semaphore,
     uint64_t*                                   pValue)
 {
-    return ApiDevice::ObjectFromHandle(device)->GetSemaphoreCounterValue(
-        semaphore,
-        pValue);
+    return ApiDevice::ObjectFromHandle(device)->GetSemaphoreCounterValue(semaphore, pValue);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkWaitSemaphores(
@@ -773,9 +838,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkWaitSemaphores(
     const VkSemaphoreWaitInfo*                  pWaitInfo,
     uint64_t                                    timeout)
 {
-    return ApiDevice::ObjectFromHandle(device)->WaitSemaphores(
-        pWaitInfo,
-        timeout);
+    return ApiDevice::ObjectFromHandle(device)->WaitSemaphores(pWaitInfo, timeout);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkSignalSemaphore(
@@ -819,7 +882,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateAccelerationStructureKHR(
     Device*                      pDevice = ApiDevice::ObjectFromHandle(device);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return pDevice->CreateAccelerationStructureKHR(pCreateInfo, pAllocCB, pAccelerationStructure);
+    return pDevice->CreateAccelerationStructureKHR(
+		pCreateInfo,
+		pAllocCB,
+		pAccelerationStructure);
 }
 
 // =====================================================================================================================
@@ -929,7 +995,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetRayTracingCaptureReplayShaderGroupHandlesKHR
     // replaying and we will make use of them in vkCreateRayTracingPipelinesKHR.
     RayTracingPipeline* pPipeline = RayTracingPipeline::ObjectFromHandle(pipeline);
 
-    pPipeline->GetRayTracingShaderGroupHandles(DefaultDeviceIndex, firstGroup, groupCount, dataSize, pData);
+    pPipeline->GetRayTracingShaderGroupHandles(
+		DefaultDeviceIndex,
+		firstGroup,
+		groupCount,
+		dataSize,
+		pData);
 
     return VK_SUCCESS;
 }
@@ -1014,9 +1085,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCopyMemoryToMicromapEXT(
 {
     Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return pDevice->CopyMemoryToMicromapEXT(
-        deferredOperation,
-        pInfo);
+    return pDevice->CopyMemoryToMicromapEXT(deferredOperation, pInfo);
 }
 
 // =====================================================================================================================
@@ -1027,9 +1096,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCopyMicromapToMemoryEXT(
 {
     Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return pDevice->CopyMicromapToMemoryEXT(
-        deferredOperation,
-        pInfo);
+    return pDevice->CopyMicromapToMemoryEXT(deferredOperation, pInfo);
 }
 
 // =====================================================================================================================
@@ -1055,9 +1122,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCopyMicromapEXT(
 {
     Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return pDevice->CopyMicromapEXT(
-        deferredOperation,
-        pInfo);
+    return pDevice->CopyMicromapEXT(deferredOperation, pInfo);
 }
 
 // =====================================================================================================================
@@ -1102,9 +1167,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceMicromapCompatibilityEXT(
 {
     Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return pDevice->GetDeviceMicromapCompatibilityEXT(
-        pVersionInfo,
-        pCompatibility);
+    return pDevice->GetDeviceMicromapCompatibilityEXT(pVersionInfo, pCompatibility);
 }
 #endif
 
@@ -1213,7 +1276,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPipelineBinaryDataKHR(
 {
     const auto pBinary = PipelineBinary::ObjectFromHandle(pInfo->pipelineBinary);
 
-    return pBinary->GetPipelineBinaryData(pPipelineBinaryKey, pPipelineBinaryDataSize, pPipelineBinaryData);
+    return pBinary->GetPipelineBinaryData(
+		pPipelineBinaryKey,
+		pPipelineBinaryDataSize,
+		pPipelineBinaryData);
 }
 
 // =====================================================================================================================
@@ -1222,11 +1288,14 @@ VKAPI_ATTR VkResult VKAPI_CALL vkReleaseCapturedPipelineDataKHR(
     const VkReleaseCapturedPipelineDataInfoKHR* pInfo,
     const VkAllocationCallbacks*                pAllocator)
 {
-    const auto pDevice   = ApiDevice::ObjectFromHandle(device);
+    Device* pDevice = ApiDevice::ObjectFromHandle(device);
     const auto pPipeline = Pipeline::BaseObjectFromHandle(pInfo->pipeline);
-    const auto pAllocCB  = (pAllocator != nullptr) ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
+    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
-    return PipelineBinary::ReleaseCapturedPipelineData(pDevice, pPipeline, pAllocCB);
+    return PipelineBinary::ReleaseCapturedPipelineData(
+		pDevice,
+		pPipeline,
+		pAllocCB);
 }
 
 // =====================================================================================================================
@@ -1303,10 +1372,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateIndirectCommandsLayoutEXT(
     VkIndirectCommandsLayoutEXT*                    pIndirectCommandsLayout)
 {
     Device* pDevice = ApiDevice::ObjectFromHandle(device);
-    const VkAllocationCallbacks* pAllocCB = (pAllocator != nullptr) ? pAllocator :
-                                                                      pDevice->VkInstance()->GetAllocCallbacks();
-
-    return pDevice->CreateIndirectCommandsLayout(pCreateInfo, pAllocCB, pIndirectCommandsLayout);
+    const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
+    return pDevice->CreateIndirectCommandsLayout(
+		pCreateInfo,
+		pAllocCB,
+		pIndirectCommandsLayout);
 }
 
 // =====================================================================================================================
@@ -1328,8 +1398,7 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyIndirectCommandsLayoutEXT(
     if (indirectCommandsLayout != VK_NULL_HANDLE)
     {
         Device* pDevice = ApiDevice::ObjectFromHandle(device);
-        const VkAllocationCallbacks* pAllocCB = (pAllocator != nullptr) ? pAllocator :
-                                                                          pDevice->VkInstance()->GetAllocCallbacks();
+        const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
         IndirectCommandsLayout::ObjectFromHandle(indirectCommandsLayout)->Destroy(pDevice, pAllocCB);
     }
@@ -1375,10 +1444,6 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateIndirectExecutionSetShaderEXT(
 {
 
 }
-
-} // entry
-
-} // vk
 
 } // namespace entry
 

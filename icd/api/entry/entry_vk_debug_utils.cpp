@@ -48,7 +48,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
 
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pInstance->GetAllocCallbacks();
 
-    return DebugUtilsMessenger::Create(pInstance, pCreateInfo, pAllocCB, pMessenger);
+    return DebugUtilsMessenger::Create(
+		pInstance,
+		pCreateInfo,
+		pAllocCB,
+		pMessenger);
 }
 
 // =====================================================================================================================
@@ -73,7 +77,10 @@ VKAPI_ATTR void VKAPI_CALL vkSubmitDebugUtilsMessageEXT(
 {
     Instance* pInstance = Instance::ObjectFromHandle(instance);
 
-    pInstance->CallExternalMessengers(messageSeverity, messageTypes, pCallbackData);
+    pInstance->CallExternalMessengers(
+		messageSeverity,
+		messageTypes,
+		pCallbackData);
 }
 } // namespace entry
 

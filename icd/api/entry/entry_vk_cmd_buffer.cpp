@@ -38,39 +38,39 @@ namespace entry
 
 // =====================================================================================================================
 VKAPI_ATTR VkResult VKAPI_CALL vkBeginCommandBuffer(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     const VkCommandBufferBeginInfo*             pBeginInfo)
 {
-    return ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->Begin(pBeginInfo);
+    return ApiCmdBuffer::ObjectFromHandle(commandBuffer)->Begin(pBeginInfo);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR VkResult VKAPI_CALL vkEndCommandBuffer(
-    VkCommandBuffer                             cmdBuffer)
+    VkCommandBuffer                             commandBuffer)
 {
-    return ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->End();
+    return ApiCmdBuffer::ObjectFromHandle(commandBuffer)->End();
 }
 
 // =====================================================================================================================
 VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandBuffer(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkCommandBufferResetFlags                   flags)
 {
-    return ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->Reset(flags);
+    return ApiCmdBuffer::ObjectFromHandle(commandBuffer)->Reset(flags);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdBindPipeline(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkPipelineBindPoint                         pipelineBindPoint,
     VkPipeline                                  pipeline)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->BindPipeline(pipelineBindPoint, pipeline);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindPipeline(pipelineBindPoint, pipeline);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkPipelineBindPoint                         pipelineBindPoint,
     VkPipelineLayout                            layout,
     uint32_t                                    firstSet,
@@ -79,8 +79,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
     uint32_t                                    dynamicOffsetCount,
     const uint32_t*                             pDynamicOffsets)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->VkDevice()->GetEntryPoints().vkCmdBindDescriptorSets(
-        cmdBuffer,
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->VkDevice()->GetEntryPoints().vkCmdBindDescriptorSets(
+        commandBuffer,
         pipelineBindPoint,
         layout,
         firstSet,
@@ -92,31 +92,31 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdBindIndexBuffer(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    buffer,
     VkDeviceSize                                offset,
     VkIndexType                                 indexType)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->BindIndexBuffer(
-        buffer,
-        offset,
-        VK_WHOLE_SIZE,
-        indexType);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindIndexBuffer(
+		buffer,
+		offset,
+		VK_WHOLE_SIZE,
+		indexType);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdBindIndexBuffer2(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    buffer,
     VkDeviceSize                                offset,
     VkDeviceSize                                size,
     VkIndexType                                 indexType)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->BindIndexBuffer(
-        buffer,
-        offset,
-        size,
-        indexType);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindIndexBuffer(
+		buffer,
+		offset,
+		size,
+		indexType);
 }
 
 // =====================================================================================================================
@@ -176,13 +176,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorBufferEmbeddedSamplers2EXT(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdBindVertexBuffers(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     uint32_t                                    firstBinding,
     uint32_t                                    bindingCount,
     const VkBuffer*                             pBuffers,
     const VkDeviceSize*                         pOffsets)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->BindVertexBuffers(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindVertexBuffers(
         firstBinding,
         bindingCount,
         pBuffers,
@@ -193,13 +193,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindVertexBuffers(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdDraw(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     uint32_t                                    vertexCount,
     uint32_t                                    instanceCount,
     uint32_t                                    firstVertex,
     uint32_t                                    firstInstance)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->Draw(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->Draw(
         firstVertex,
         vertexCount,
         firstInstance,
@@ -208,14 +208,14 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDraw(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexed(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     uint32_t                                    indexCount,
     uint32_t                                    instanceCount,
     uint32_t                                    firstIndex,
     int32_t                                     vertexOffset,
     uint32_t                                    firstInstance)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->DrawIndexed(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DrawIndexed(
         firstIndex,
         indexCount,
         vertexOffset,
@@ -225,7 +225,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexed(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndirect(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    buffer,
     VkDeviceSize                                offset,
     uint32_t                                    drawCount,
@@ -234,7 +234,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndirect(
     constexpr bool Indexed       = false;
     constexpr bool BufferedCount = false;
 
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->DrawIndirect<Indexed, BufferedCount>(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DrawIndirect<Indexed, BufferedCount>(
         buffer,
         offset,
         drawCount,
@@ -245,7 +245,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndirect(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexedIndirect(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    buffer,
     VkDeviceSize                                offset,
     uint32_t                                    drawCount,
@@ -254,7 +254,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexedIndirect(
     constexpr bool Indexed       = true;
     constexpr bool BufferedCount = false;
 
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->DrawIndirect<Indexed, BufferedCount>(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DrawIndirect<Indexed, BufferedCount>(
         buffer,
         offset,
         drawCount,
@@ -265,7 +265,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexedIndirect(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndirectCount(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    buffer,
     VkDeviceSize                                offset,
     VkBuffer                                    countBuffer,
@@ -276,7 +276,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndirectCount(
     constexpr bool Indexed       = false;
     constexpr bool BufferedCount = true;
 
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->DrawIndirect<Indexed, BufferedCount>(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DrawIndirect<Indexed, BufferedCount>(
         buffer,
         offset,
         maxDrawCount,
@@ -287,7 +287,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndirectCount(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexedIndirectCount(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    buffer,
     VkDeviceSize                                offset,
     VkBuffer                                    countBuffer,
@@ -298,7 +298,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexedIndirectCount(
     constexpr bool Indexed       = true;
     constexpr bool BufferedCount = true;
 
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->DrawIndirect<Indexed, BufferedCount>(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DrawIndirect<Indexed, BufferedCount>(
         buffer,
         offset,
         maxDrawCount,
@@ -355,21 +355,24 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawMeshTasksIndirectCountEXT(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdDispatch(
-    VkCommandBuffer                             cmdBuffer,
-    uint32_t                                    x,
-    uint32_t                                    y,
-    uint32_t                                    z)
+    VkCommandBuffer                             commandBuffer,
+    uint32_t                                    groupCountX,
+    uint32_t                                    groupCountY,
+    uint32_t                                    groupCountZ)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->Dispatch(x, y, z);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->Dispatch(
+        groupCountX,
+        groupCountY,
+        groupCountZ);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdDispatchIndirect(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    buffer,
     VkDeviceSize                                offset)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->DispatchIndirect(buffer, offset);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DispatchIndirect(buffer, offset);
 }
 
 // =====================================================================================================================
@@ -427,13 +430,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdExecuteGeneratedCommandsEXT(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdCopyBuffer(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    srcBuffer,
     VkBuffer                                    dstBuffer,
     uint32_t                                    regionCount,
     const VkBufferCopy*                         pRegions)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->CopyBuffer(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->CopyBuffer(
         srcBuffer,
         dstBuffer,
         regionCount,
@@ -442,7 +445,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyBuffer(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdCopyImage(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkImage                                     srcImage,
     VkImageLayout                               srcImageLayout,
     VkImage                                     dstImage,
@@ -450,7 +453,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyImage(
     uint32_t                                    regionCount,
     const VkImageCopy*                          pRegions)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->CopyImage(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->CopyImage(
         srcImage,
         srcImageLayout,
         dstImage,
@@ -461,7 +464,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyImage(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdBlitImage(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkImage                                     srcImage,
     VkImageLayout                               srcImageLayout,
     VkImage                                     dstImage,
@@ -470,7 +473,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBlitImage(
     const VkImageBlit*                          pRegions,
     VkFilter                                    filter)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->BlitImage(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BlitImage(
         srcImage,
         srcImageLayout,
         dstImage,
@@ -482,14 +485,14 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBlitImage(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdCopyBufferToImage(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    srcBuffer,
     VkImage                                     dstImage,
     VkImageLayout                               dstImageLayout,
     uint32_t                                    regionCount,
     const VkBufferImageCopy*                    pRegions)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->CopyBufferToImage(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->CopyBufferToImage(
         srcBuffer,
         dstImage,
         dstImageLayout,
@@ -499,14 +502,14 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyBufferToImage(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdCopyImageToBuffer(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkImage                                     srcImage,
     VkImageLayout                               srcImageLayout,
     VkBuffer                                    dstBuffer,
     uint32_t                                    regionCount,
     const VkBufferImageCopy*                    pRegions)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->CopyImageToBuffer(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->CopyImageToBuffer(
         srcImage,
         srcImageLayout,
         dstBuffer,
@@ -516,13 +519,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyImageToBuffer(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdUpdateBuffer(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    dstBuffer,
     VkDeviceSize                                dstOffset,
     VkDeviceSize                                dataSize,
     const void*                                 pData)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->UpdateBuffer(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->UpdateBuffer(
         dstBuffer,
         dstOffset,
         dataSize,
@@ -531,13 +534,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdUpdateBuffer(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdFillBuffer(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkBuffer                                    dstBuffer,
     VkDeviceSize                                dstOffset,
     VkDeviceSize                                size,
     uint32_t                                    data)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->FillBuffer(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->FillBuffer(
         dstBuffer,
         dstOffset,
         size,
@@ -546,14 +549,14 @@ VKAPI_ATTR void VKAPI_CALL vkCmdFillBuffer(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdClearColorImage(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkImage                                     image,
     VkImageLayout                               imageLayout,
     const VkClearColorValue*                    pColor,
     uint32_t                                    rangeCount,
     const VkImageSubresourceRange*              pRanges)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->ClearColorImage(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->ClearColorImage(
         image,
         imageLayout,
         pColor,
@@ -563,14 +566,14 @@ VKAPI_ATTR void VKAPI_CALL vkCmdClearColorImage(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdClearDepthStencilImage(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkImage                                     image,
     VkImageLayout                               imageLayout,
     const VkClearDepthStencilValue*             pDepthStencil,
     uint32_t                                    rangeCount,
     const VkImageSubresourceRange*              pRanges)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->ClearDepthStencilImage(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->ClearDepthStencilImage(
         image,
         imageLayout,
         pDepthStencil->depth,
@@ -581,13 +584,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdClearDepthStencilImage(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdClearAttachments(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     uint32_t                                    attachmentCount,
     const VkClearAttachment*                    pAttachments,
     uint32_t                                    rectCount,
     const VkClearRect*                          pRects)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->ClearAttachments(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->ClearAttachments(
         attachmentCount,
         pAttachments,
         rectCount,
@@ -596,7 +599,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdClearAttachments(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdResolveImage(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkImage                                     srcImage,
     VkImageLayout                               srcImageLayout,
     VkImage                                     dstImage,
@@ -604,7 +607,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdResolveImage(
     uint32_t                                    regionCount,
     const VkImageResolve*                       pRegions)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->ResolveImage(srcImage,
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->ResolveImage(srcImage,
                                                             srcImageLayout,
                                                             dstImage,
                                                             dstImageLayout,
@@ -614,25 +617,25 @@ VKAPI_ATTR void VKAPI_CALL vkCmdResolveImage(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetEvent(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkEvent                                     event,
     VkPipelineStageFlags                        stageMask)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetEvent(event, stageMask);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetEvent(event, stageMask);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdResetEvent(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkEvent                                     event,
     VkPipelineStageFlags                        stageMask)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->ResetEvent(event, stageMask);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->ResetEvent(event, stageMask);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     uint32_t                                    eventCount,
     const VkEvent*                              pEvents,
     VkPipelineStageFlags                        srcStageMask,
@@ -644,7 +647,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(
     uint32_t                                    imageMemoryBarrierCount,
     const VkImageMemoryBarrier*                 pImageMemoryBarriers)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->WaitEvents(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->WaitEvents(
         eventCount,
         pEvents,
         srcStageMask,
@@ -659,7 +662,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdPipelineBarrier(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkPipelineStageFlags                        srcStageMask,
     VkPipelineStageFlags                        dstStageMask,
     VkDependencyFlags                           dependencyFlags,
@@ -670,7 +673,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPipelineBarrier(
     uint32_t                                    imageMemoryBarrierCount,
     const VkImageMemoryBarrier*                 pImageMemoryBarriers)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->PipelineBarrier(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->PipelineBarrier(
         srcStageMask,
         dstStageMask,
         memoryBarrierCount,
@@ -683,43 +686,48 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPipelineBarrier(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdBeginQuery(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkQueryPool                                 queryPool,
     uint32_t                                    query,
     VkQueryControlFlags                         flags)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->BeginQueryIndexed(queryPool, query, flags, 0);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BeginQueryIndexed(
+		queryPool,
+		query,
+		flags,
+		0);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdEndQuery(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkQueryPool                                 queryPool,
     uint32_t                                    query)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->EndQueryIndexed(queryPool, query, 0);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->EndQueryIndexed(queryPool, query, 0);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdResetQueryPool(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkQueryPool                                 queryPool,
     uint32_t                                    firstQuery,
     uint32_t                                    queryCount)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->ResetQueryPool(queryPool,
-                                                              firstQuery,
-                                                              queryCount);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->ResetQueryPool(
+		queryPool,
+        firstQuery,
+        queryCount);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdWriteTimestamp(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkPipelineStageFlagBits                     pipelineStage,
     VkQueryPool                                 queryPool,
     uint32_t                                    query)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->WriteTimestamp(
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->WriteTimestamp(
         pipelineStage,
         QueryPool::ObjectFromHandle(queryPool)->AsTimestampQueryPool(),
         query);
@@ -727,7 +735,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWriteTimestamp(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdCopyQueryPoolResults(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkQueryPool                                 queryPool,
     uint32_t                                    firstQuery,
     uint32_t                                    queryCount,
@@ -736,25 +744,27 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyQueryPoolResults(
     VkDeviceSize                                stride,
     VkQueryResultFlags                          flags)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->CopyQueryPoolResults(queryPool,
-                                                                    firstQuery,
-                                                                    queryCount,
-                                                                    dstBuffer,
-                                                                    dstOffset,
-                                                                    stride,
-                                                                    flags);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->CopyQueryPoolResults(
+		queryPool,
+        firstQuery,
+        queryCount,
+        dstBuffer,
+        dstOffset,
+        stride,
+        flags);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdPushConstants(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkPipelineLayout                            layout,
     VkShaderStageFlags                          stageFlags,
     uint32_t                                    offset,
     uint32_t                                    size,
     const void*                                 pValues)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->PushConstants(layout,
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->PushConstants(
+		layout,
         stageFlags,
         offset,
         size,
@@ -813,11 +823,11 @@ VKAPI_ATTR void VKAPI_CALL vkCmdEndRenderPass2(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdExecuteCommands(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     uint32_t                                    commandBufferCount,
     const VkCommandBuffer*                      pCommandBuffers)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->ExecuteCommands(commandBufferCount, pCommandBuffers);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->ExecuteCommands(commandBufferCount, pCommandBuffers);
 }
 
 // =====================================================================================================================
@@ -846,8 +856,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDispatchBase(
     uint32_t                                    groupCountY,
     uint32_t                                    groupCountZ)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DispatchOffset(baseGroupX, baseGroupY, baseGroupZ,
-                                                                  groupCountX, groupCountY, groupCountZ);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DispatchOffset(
+		baseGroupX,
+		baseGroupY,
+		baseGroupZ,
+        groupCountX,
+		groupCountY,
+		groupCountZ);
 }
 
 // =====================================================================================================================
@@ -860,84 +875,93 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMask(
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetViewport(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     uint32_t                                    firstViewport,
     uint32_t                                    viewportCount,
     const VkViewport*                           pViewports)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetViewport(firstViewport, viewportCount, pViewports);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetViewport(
+		firstViewport,
+		viewportCount,
+		pViewports);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetScissor(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     uint32_t                                    firstScissor,
     uint32_t                                    scissorCount,
     const VkRect2D*                             pScissors)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetScissor(firstScissor, scissorCount, pScissors);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetScissor(
+		firstScissor,
+		scissorCount,
+		pScissors);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetLineWidth(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     float                                       lineWidth)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetLineWidth(lineWidth);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetLineWidth(lineWidth);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetDepthBias(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     float                                       depthBiasConstantFactor,
     float                                       depthBiasClamp,
     float                                       depthBiasSlopeFactor)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetDepthBias(depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetDepthBias(
+		depthBiasConstantFactor,
+		depthBiasClamp,
+		depthBiasSlopeFactor);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetBlendConstants(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     const float                                 blendConstants[4])
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetBlendConstants(blendConstants);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetBlendConstants(blendConstants);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetDepthBounds(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     float                                       minDepthBounds,
     float                                       maxDepthBounds)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetDepthBounds(minDepthBounds, maxDepthBounds);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetDepthBounds(minDepthBounds, maxDepthBounds);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetStencilCompareMask(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkStencilFaceFlags                          faceMask,
     uint32_t                                    compareMask)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetStencilCompareMask(faceMask, compareMask);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetStencilCompareMask(faceMask, compareMask);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetStencilWriteMask(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkStencilFaceFlags                          faceMask,
     uint32_t                                    writeMask)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetStencilWriteMask(faceMask, writeMask);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetStencilWriteMask(faceMask, writeMask);
 }
 
 // =====================================================================================================================
 VKAPI_ATTR void VKAPI_CALL vkCmdSetStencilReference(
-    VkCommandBuffer                             cmdBuffer,
+    VkCommandBuffer                             commandBuffer,
     VkStencilFaceFlags                          faceMask,
     uint32_t                                    reference)
 {
-    ApiCmdBuffer::ObjectFromHandle(cmdBuffer)->SetStencilReference(faceMask, reference);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetStencilReference(faceMask, reference);
 }
 
 // =====================================================================================================================
@@ -1004,7 +1028,11 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWriteBufferMarkerAMD(
     VkDeviceSize            dstOffset,
     uint32_t                marker)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->WriteBufferMarker(pipelineStage, dstBuffer, dstOffset, marker);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->WriteBufferMarker(
+		pipelineStage,
+		dstBuffer,
+		dstOffset,
+		marker);
 }
 
 // =====================================================================================================================
@@ -1016,11 +1044,12 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindTransformFeedbackBuffersEXT(
     const VkDeviceSize*                         pOffsets,
     const VkDeviceSize*                         pSizes)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindTransformFeedbackBuffers(firstBinding,
-                                                                                bindingCount,
-                                                                                pBuffers,
-                                                                                pOffsets,
-                                                                                pSizes);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindTransformFeedbackBuffers(
+		firstBinding,
+        bindingCount,
+        pBuffers,
+        pOffsets,
+        pSizes);
 }
 
 // =====================================================================================================================
@@ -1031,10 +1060,11 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBeginTransformFeedbackEXT(
     const VkBuffer*                             pCounterBuffers,
     const VkDeviceSize*                         pCounterBufferOffsets)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BeginTransformFeedback(firstCounterBuffer,
-                                                                          counterBufferCount,
-                                                                          pCounterBuffers,
-                                                                          pCounterBufferOffsets);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BeginTransformFeedback(
+		firstCounterBuffer,
+      counterBufferCount,
+      pCounterBuffers,
+      pCounterBufferOffsets);
 }
 
 // =====================================================================================================================
@@ -1045,10 +1075,11 @@ VKAPI_ATTR void VKAPI_CALL vkCmdEndTransformFeedbackEXT(
     const VkBuffer*                             pCounterBuffers,
     const VkDeviceSize*                         pCounterBufferOffsets)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->EndTransformFeedback(firstCounterBuffer,
-                                                                        counterBufferCount,
-                                                                        pCounterBuffers,
-                                                                        pCounterBufferOffsets);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->EndTransformFeedback(
+		firstCounterBuffer,
+        counterBufferCount,
+        pCounterBuffers,
+        pCounterBufferOffsets);
 }
 
 // =====================================================================================================================
@@ -1059,7 +1090,11 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBeginQueryIndexedEXT(
     VkQueryControlFlags                         flags,
     uint32_t                                    index)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BeginQueryIndexed(queryPool, query, flags, index);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BeginQueryIndexed(
+        queryPool,
+        query,
+        flags,
+        index);
 }
 
 // =====================================================================================================================
@@ -1069,7 +1104,10 @@ VKAPI_ATTR void VKAPI_CALL vkCmdEndQueryIndexedEXT(
     uint32_t                                    query,
     uint32_t                                    index)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->EndQueryIndexed(queryPool, query, index);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->EndQueryIndexed(
+        queryPool,
+        query,
+        index);
 }
 
 // =====================================================================================================================
@@ -1082,12 +1120,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndirectByteCountEXT(
     uint32_t                                    counterOffset,
     uint32_t                                    vertexStride)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DrawIndirectByteCount(instanceCount,
-                                                                         firstInstance,
-                                                                         counterBuffer,
-                                                                         counterBufferOffset,
-                                                                         counterOffset,
-                                                                         vertexStride);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->DrawIndirectByteCount(
+        instanceCount,
+        firstInstance,
+        counterBuffer,
+        counterBufferOffset,
+        counterOffset,
+        vertexStride);
 }
 
 #if VKI_RAY_TRACING
@@ -1281,9 +1320,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetLineStipple(
     uint32_t                                    lineStippleFactor,
     uint16_t                                    lineStipplePattern)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetLineStipple(
-        lineStippleFactor,
-        lineStipplePattern);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetLineStipple(lineStippleFactor, lineStipplePattern);
 }
 
 // =====================================================================================================================
@@ -1333,7 +1370,10 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents2(
     const VkEvent*                              pEvents,
     const VkDependencyInfoKHR*                  pDependencyInfos)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->WaitEvents2(eventCount, pEvents, pDependencyInfos);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->WaitEvents2(
+		eventCount,
+		pEvents,
+		pDependencyInfos);
 }
 
 // =====================================================================================================================
@@ -1365,7 +1405,11 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWriteBufferMarker2AMD(
     VkDeviceSize                                dstOffset,
     uint32_t                                    marker)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->WriteBufferMarker(stage, dstBuffer, dstOffset, marker);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->WriteBufferMarker(
+        stage,
+        dstBuffer,
+        dstOffset,
+        marker);
 }
 
 // =====================================================================================================================
@@ -1435,12 +1479,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindVertexBuffers2(
     const VkDeviceSize*                         pSizes,
     const VkDeviceSize*                         pStrides)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindVertexBuffers(firstBinding,
-                                                                     bindingCount,
-                                                                     pBuffers,
-                                                                     pOffsets,
-                                                                     pSizes,
-                                                                     pStrides);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindVertexBuffers(
+        firstBinding,
+        bindingCount,
+        pBuffers,
+        pOffsets,
+        pSizes,
+        pStrides);
 }
 
 // =====================================================================================================================
@@ -1492,7 +1537,12 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetStencilOp(
     VkStencilOp                                 depthFailOp,
     VkCompareOp                                 compareOp)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetStencilOpEXT(faceMask, failOp, passOp, depthFailOp, compareOp);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetStencilOpEXT(
+        faceMask,
+        failOp,
+        passOp,
+        depthFailOp,
+        compareOp);
 }
 
 // =====================================================================================================================
@@ -1501,9 +1551,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorBuffersEXT(
     uint32_t                                    bufferCount,
     const VkDescriptorBufferBindingInfoEXT*     pBindingInfos)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindDescriptorBuffers(
-        bufferCount,
-        pBindingInfos);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->BindDescriptorBuffers(bufferCount, pBindingInfos);
 }
 
 // =====================================================================================================================
@@ -1593,9 +1641,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetDepthClampRangeEXT(
     VkDepthClampModeEXT                         depthClampMode,
     const VkDepthClampRangeEXT*                 pDepthClampRange)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->CmdSetDepthClampRangeEXT(
-        depthClampMode,
-        pDepthClampRange);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->CmdSetDepthClampRangeEXT(depthClampMode, pDepthClampRange);
 }
 
 // =====================================================================================================================
@@ -1785,9 +1831,10 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetColorBlendEnableEXT(
     uint32_t                            attachmentCount,
     const VkBool32*                     pColorBlendEnables)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetColorBlendEnable(firstAttachment,
-                                                                       attachmentCount,
-                                                                       pColorBlendEnables);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetColorBlendEnable(
+        firstAttachment,
+        attachmentCount,
+        pColorBlendEnables);
 }
 
 // =====================================================================================================================
@@ -1797,9 +1844,10 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetColorBlendEquationEXT(
     uint32_t                            attachmentCount,
     const VkColorBlendEquationEXT*      pColorBlendEquations)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetColorBlendEquation(firstAttachment,
-                                                                         attachmentCount,
-                                                                            pColorBlendEquations);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetColorBlendEquation(
+        firstAttachment,
+        attachmentCount,
+        pColorBlendEquations);
 }
 
 // =====================================================================================================================
@@ -1809,9 +1857,10 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetColorWriteMaskEXT(
     uint32_t                            attachmentCount,
     const  VkColorComponentFlags*       pColorWriteMasks)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetColorWriteMask(firstAttachment,
-                                                                     attachmentCount,
-                                                                     pColorWriteMasks);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetColorWriteMask(
+        firstAttachment,
+        attachmentCount,
+        pColorWriteMasks);
 }
 
 // =====================================================================================================================
@@ -1835,8 +1884,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetExtraPrimitiveOverestimationSizeEXT(
     VkCommandBuffer                     commandBuffer,
     float                               extraPrimitiveOverestimationSize)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->
-        SetExtraPrimitiveOverestimationSize(extraPrimitiveOverestimationSize);
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetExtraPrimitiveOverestimationSize(extraPrimitiveOverestimationSize);
 }
 
 // =====================================================================================================================
@@ -1905,11 +1953,11 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetVertexInputEXT(
     uint32_t                                     vertexAttributeDescriptionCount,
     const VkVertexInputAttributeDescription2EXT* pVertexAttributeDescriptions)
 {
-    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetVertexInput(vertexBindingDescriptionCount,
-                                                                  pVertexBindingDescriptions,
-                                                                  vertexAttributeDescriptionCount,
-                                                                  pVertexAttributeDescriptions);
-
+    ApiCmdBuffer::ObjectFromHandle(commandBuffer)->SetVertexInput(
+        vertexBindingDescriptionCount,
+        pVertexBindingDescriptions,
+        vertexAttributeDescriptionCount,
+        pVertexAttributeDescriptions);
 }
 
 // =====================================================================================================================

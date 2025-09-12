@@ -55,7 +55,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorPool(
 {
     const Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return pDevice->GetEntryPoints().vkCreateDescriptorPool(device, pCreateInfo, pAllocator, pDescriptorPool);
+    return pDevice->GetEntryPoints().vkCreateDescriptorPool(
+		device,
+		pCreateInfo,
+		pAllocator,
+		pDescriptorPool);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkFreeDescriptorSets(
@@ -66,7 +70,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkFreeDescriptorSets(
 {
     const Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return pDevice->GetEntryPoints().vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, pDescriptorSets);
+    return pDevice->GetEntryPoints().vkFreeDescriptorSets(
+		device,
+		descriptorPool,
+		descriptorSetCount,
+		pDescriptorSets);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetDescriptorPool(
@@ -76,7 +84,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetDescriptorPool(
 {
     const Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return pDevice->GetEntryPoints().vkResetDescriptorPool(device, descriptorPool, flags);
+    return pDevice->GetEntryPoints().vkResetDescriptorPool(
+		device,
+		descriptorPool,
+		flags);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorPool(

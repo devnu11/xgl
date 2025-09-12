@@ -74,7 +74,14 @@ VKAPI_ATTR void VKAPI_CALL vkDebugReportMessageEXT(
 {
     Instance* pInstance = Instance::ObjectFromHandle(instance);
 
-    pInstance->CallExternalCallbacks(flags, objectType, object, location, messageCode, pLayerPrefix, pMessage);
+    pInstance->CallExternalCallbacks(
+        flags,
+        objectType,
+        object,
+        location,
+        messageCode,
+        pLayerPrefix,
+        pMessage);
 }
 
 } // namespace entry
