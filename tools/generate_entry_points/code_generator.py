@@ -19,6 +19,10 @@ class EntryPointGenerator:
         self.type_mapper = TypeMapper()
         self.logger = logging.getLogger(__name__)
         self.verbose = False
+        
+        # Always configure logging to show warnings and errors
+        if not self.logger.handlers:
+            logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s')
     
     def enable_verbose(self) -> None:
         """Enable verbose logging."""
@@ -85,6 +89,7 @@ class EntryPointGenerator:
         
         groups: Dict[str, List[Command]] = {}
         unmapped_functions = []
+        missing_functions = []  # Functions in mappings but not in XML
         
         # Iterate through file mappings in order to preserve function ordering
         for file_name, mapping_data in file_mappings.items():
@@ -116,6 +121,9 @@ class EntryPointGenerator:
                         command.impl_return = None
                     
                     groups[file_name].append(command)
+                else:
+                    # Function is in mapping but not found in XML
+                    missing_functions.append(f"{func_name} (mapped to {file_name})")
         
         # Check for functions in commands that aren't mapped to any file
         mapped_functions = set()
@@ -140,6 +148,13 @@ class EntryPointGenerator:
             for func in sorted(unmapped_functions):
                 self._log_info(f"  - {func}")
             self._log_info("These functions will not be generated unless added to the file mappings.")
+        
+        # Report missing functions (in mappings but not in XML)
+        if missing_functions:
+            self.logger.warning(f"{len(missing_functions)} functions are mapped but don't exist in XML registry:")
+            for func in sorted(missing_functions):
+                self.logger.warning(f"  - {func}")
+            self.logger.warning("These mappings may be vestigial and should be reviewed/removed.")
         
         return groups
     
