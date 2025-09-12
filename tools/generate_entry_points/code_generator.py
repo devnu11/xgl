@@ -190,6 +190,13 @@ class EntryPointGenerator:
                     {'name': 'vkCmdSetAlphaToOneEnableEXT', 'impl': 'not_implemented'},
                     {'name': 'vkCmdSetRasterizationStreamEXT', 'impl': 'not_implemented'},
                     {'name': 'vkCmdSetColorBlendAdvancedEXT', 'impl': 'never_called'},
+                    # Functions that use cmd_buffer GetEntryPoints pattern
+                    {'name': 'vkCmdBindDescriptorSets', 'impl': 'cmd_buffer_entry_points'},
+                    {'name': 'vkCmdBindDescriptorSets2', 'impl': 'cmd_buffer_entry_points'},
+                    {'name': 'vkCmdPushDescriptorSet2', 'impl': 'cmd_buffer_entry_points'},
+                    {'name': 'vkCmdPushDescriptorSetWithTemplate2', 'impl': 'cmd_buffer_entry_points'},
+                    {'name': 'vkCmdPushDescriptorSet', 'impl': 'cmd_buffer_entry_points'},
+                    {'name': 'vkCmdPushDescriptorSetWithTemplate', 'impl': 'cmd_buffer_entry_points'}
                     # Add more as needed...
                 ]
             },
@@ -233,6 +240,19 @@ class EntryPointGenerator:
             },
             'descriptor_buffer': {
                 'functions': [
+                ]
+            },
+            'descriptor_set': {
+                'functions': [
+                    {'name': 'vkUpdateDescriptorSets', 'impl': 'entry_points'}
+                ]
+            },
+            'descriptor_pool': {
+                'functions': [
+                    {'name': 'vkCreateDescriptorPool', 'impl': 'entry_points'},
+                    {'name': 'vkFreeDescriptorSets', 'impl': 'entry_points'},
+                    {'name': 'vkResetDescriptorPool', 'impl': 'entry_points'},
+                    {'name': 'vkAllocateDescriptorSets', 'impl': 'entry_points'}
                 ]
             },
 
@@ -708,6 +728,8 @@ class EntryPointGenerator:
             'parameters': self.type_mapper.format_parameter_list(command.parameters),
             'method_name': method_name,
             'method_params': self.type_mapper.format_method_parameters(command.parameters, skip_first=skip_first_param),
+            # For entry_points pattern, include all parameters (don't skip first)
+            'entry_points_params': self.type_mapper.format_method_parameters(command.parameters, skip_first=False),
             # Add implementation metadata from enhanced mappings
             'impl_type': impl_type,
             'impl_method': impl_method,

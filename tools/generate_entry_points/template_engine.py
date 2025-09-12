@@ -130,6 +130,16 @@ $inline_implementation""")
     VK_ASSERT($assertion_condition);
 $remaining_implementation""")
 
+    # Template for GetEntryPoints() pattern used in descriptor_set and similar files
+    ENTRY_POINTS_FUNCTION_BODY = CodeTemplate("""
+    const Device*             pDevice          = ApiDevice::ObjectFromHandle($handle_param);
+
+    ${return_statement}pDevice->GetEntryPoints().$function_name($entry_points_params);""")
+
+    # Template for cmd_buffer GetEntryPoints() pattern
+    CMD_BUFFER_ENTRY_POINTS_BODY = CodeTemplate("""
+    ${return_statement}ApiCmdBuffer::ObjectFromHandle($handle_param)->VkDevice()->GetEntryPoints().$function_name($entry_points_params);""")
+
 
 class TemplateEngine:
     """Engine for rendering C++ code templates."""
@@ -179,6 +189,14 @@ class TemplateEngine:
                 return self.repo.NOT_IMPLEMENTED_FUNCTION_BODY.render(**context)
         elif impl_type == 'simple':
             return self.repo.SIMPLE_FUNCTION_BODY.render(**context)
+        elif impl_type == 'entry_points':
+            # Add return statement with space for non-void functions, empty for void
+            context['return_statement'] = '' if context.get('return_type') == 'void' else 'return '
+            return self.repo.ENTRY_POINTS_FUNCTION_BODY.render(**context)
+        elif impl_type == 'cmd_buffer_entry_points':
+            # Add return statement with space for non-void functions, empty for void
+            context['return_statement'] = '' if context.get('return_type') == 'void' else 'return '
+            return self.repo.CMD_BUFFER_ENTRY_POINTS_BODY.render(**context)
         
         elif impl_type == 'inline':
             # For simple implementations, we might have inline code or use existing simple logic
