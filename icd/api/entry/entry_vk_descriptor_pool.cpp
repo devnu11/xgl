@@ -111,7 +111,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
 {
     const Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return pDevice->GetEntryPoints().vkAllocateDescriptorSets(device, pAllocateInfo, pDescriptorSets);
+    return pDevice->GetEntryPoints().vkAllocateDescriptorSets(
+		device,
+		pAllocateInfo,
+		pDescriptorSets);
 }
 
 } // namespace entry

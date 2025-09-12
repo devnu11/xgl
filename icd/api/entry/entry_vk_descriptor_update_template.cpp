@@ -63,7 +63,10 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSetWithTemplate(
     Device*                   pDevice   = ApiDevice::ObjectFromHandle(device);
     DescriptorUpdateTemplate* pTemplate = DescriptorUpdateTemplate::ObjectFromHandle(descriptorUpdateTemplate);
 
-    pTemplate->Update(pDevice, descriptorSet, pData);
+    pTemplate->Update(
+		pDevice,
+		descriptorSet,
+		pData);
 }
 
 } // namespace entry
