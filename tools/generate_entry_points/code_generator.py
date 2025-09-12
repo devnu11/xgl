@@ -161,28 +161,35 @@ class EntryPointGenerator:
                     {'name': 'vkDestroyBufferView', 'impl': 'standard', 'method': 'Destroy'}
                 ]
             },
-            'descriptor_buffer': {
-                'functions': [
-                    {'name': 'vkGetDescriptorSetLayoutSizeEXT', 'impl': 'simple'},
-                    {'name': 'vkGetDescriptorSetLayoutBindingOffsetEXT', 'impl': 'simple'},
-                    {'name': 'vkGetDescriptorEXT', 'impl': 'simple'},
-                    {'name': 'vkGetBufferOpaqueCaptureDescriptorDataEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
-                    {'name': 'vkGetImageOpaqueCaptureDescriptorDataEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
-                    {'name': 'vkGetImageViewOpaqueCaptureDescriptorDataEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
-                    {'name': 'vkGetSamplerOpaqueCaptureDescriptorDataEXT', 'impl': 'simple'},
-                    {'name': 'vkGetAccelerationStructureOpaqueCaptureDescriptorDataEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'}
-                ]
-            },
             'cmd_buffer': {
                 'functions': [
                     # Examples of different patterns found in cmd_buffer
                     {'name': 'vkBeginCommandBuffer', 'impl': 'standard', 'method': 'Begin'},
                     {'name': 'vkEndCommandBuffer', 'impl': 'standard', 'method': 'End'},
                     {'name': 'vkResetCommandBuffer', 'impl': 'standard', 'method': 'Reset'},
+                    {'name': 'vkCmdDispatchBase', 'impl': 'standard', 'method': 'DispatchOffset'},
+                    {'name': 'vkCmdBlitImage2', 'impl': 'standard', 'method': 'BlitImage'},
+                    {'name': 'vkCmdCopyBuffer2', 'impl': 'standard', 'method': 'CopyBuffer'},
+                    {'name': 'vkCmdCopyBufferToImage2', 'impl': 'standard', 'method': 'CopyBufferToImage'},
+                    {'name': 'vkCmdCopyImage2', 'impl': 'standard', 'method': 'CopyImage'},
+                    {'name': 'vkCmdCopyImageToBuffer2', 'impl': 'standard', 'method': 'CopyImageToBuffer'},
+                    {'name': 'vkCmdResolveImage2', 'impl': 'standard', 'method': 'ResolveImage'},
                     {'name': 'vkCmdBindPipelineShaderGroupNV', 'impl': 'not_implemented'},
                     {'name': 'vkCmdUpdatePipelineIndirectBufferNV', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdPreprocessGeneratedCommandsEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdExecuteGeneratedCommandsEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdPreprocessGeneratedCommandsEXT', 'impl': 'empty'},
+                    {'name': 'vkCmdInsertDebugUtilsLabelEXT', 'impl': 'empty'},
+                    {'name': 'vkCmdSetDepthBias2EXT', 'impl': 'empty'},
+                    {'name': 'vkCmdSetDescriptorBufferOffsets2EXT', 'impl': 'standard', 'method': 'SetDescriptorBufferOffsets2EXT'},
+                    {'name': 'vkCmdSetStencilOp', 'impl': 'standard', 'method': 'SetStencilOpEXT'},
+                    {'name': 'vkCmdBuildMicromapsEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdCopyMemoryToMicromapEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdCopyMicromapEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdCopyMicromapToMemoryEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdWriteMicromapsPropertiesEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdSetPatchControlPointsEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdSetAlphaToOneEnableEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdSetRasterizationStreamEXT', 'impl': 'not_implemented'},
+                    {'name': 'vkCmdSetColorBlendAdvancedEXT', 'impl': 'never_called'},
                     # Add more as needed...
                 ]
             },
@@ -194,7 +201,41 @@ class EntryPointGenerator:
                     {'name': 'vkCopyMemoryToImage', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'},
                     {'name': 'vkTransitionImageLayout', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'}
                 ]
-            }
+            },
+            'device': {
+                'functions': [
+                    {'name': 'vkGetDeviceQueue', 'impl': 'standard', 'method': 'GetQueue'},
+                    {'name': 'vkGetDeviceQueue2', 'impl': 'standard', 'method': 'GetQueue2'},
+                    {'name': 'vkDeviceWaitIdle', 'impl': 'standard', 'method': 'WaitIdle'},
+                    {'name': 'vkBindImageMemory2', 'impl': 'standard', 'method': 'BindImageMemory'},
+                    {'name': 'vkBuildAccelerationStructuresKHR', 'impl': 'standard', 'method': 'BuildAccelerationStructure'},
+                    {'name': 'vkDebugMarkerSetObjectTagEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
+                    {'name': 'vkDebugMarkerSetObjectNameEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
+                    {'name': 'vkSetDebugUtilsObjectTagEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
+                    {'name': 'vkCreateIndirectExecutionSetEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
+                    {'name': 'vkDestroyIndirectExecutionSetEXT', 'impl': 'empty'},
+                    {'name': 'vkUpdateIndirectExecutionSetPipelineEXT', 'impl': 'empty'},
+                    {'name': 'vkUpdateIndirectExecutionSetShaderEXT', 'impl': 'empty'},
+                ]
+            },
+            'debug_report': {
+                'functions': [
+                    {'name': 'vkCreateDebugReportCallbackEXT', 'impl': 'standard', 'method': 'Create'},
+                    {'name': 'vkDebugReportMessageEXT', 'impl': 'standard', 'method': 'CallExternalCallbacks'},
+                ]
+            },
+            'deferred_operation': {
+                'functions': [
+                    {'name': 'vkGetDeferredOperationResultKHR', 'impl': 'standard', 'method': 'GetOperationResult'},
+                    {'name': 'vkGetDeferredOperationMaxConcurrencyKHR', 'impl': 'standard', 'method': 'GetMaxConcurrency'},
+                    {'name': 'vkDeferredOperationJoinKHR', 'impl': 'standard', 'method': 'Join'},
+                ]
+            },
+            'descriptor_buffer': {
+                'functions': [
+                ]
+            },
+
         }
     
     def _get_file_mappings(self) -> Dict[str, Dict[str, any]]:

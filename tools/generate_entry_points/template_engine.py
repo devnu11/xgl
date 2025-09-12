@@ -159,6 +159,18 @@ class TemplateEngine:
         if impl_type == 'success_only':
             return_value = context.get('impl_return', 'VK_SUCCESS')
             return self.repo.SUCCESS_ONLY_FUNCTION_BODY.render(return_value=return_value)
+        elif impl_type == 'empty':
+            return_value = context.get('impl_return')
+            if return_value and return_value != 'void':
+                raise ValueError("Empty implementation cannot have a return value")
+            else:
+                return '\n    // This function is intentionally left empty.'
+        elif impl_type == 'never_called':
+            return_value = context.get('impl_return')
+            if return_value and return_value != 'void':
+                return f'\n    VK_NEVER_CALLED();\n\treturn {return_value};'
+            else:
+                return '\n    VK_NEVER_CALLED();'
         elif impl_type == 'not_implemented':
             return_value = context.get('impl_return')
             if return_value and return_value != 'void':
@@ -166,6 +178,9 @@ class TemplateEngine:
             else:
                 return self.repo.NOT_IMPLEMENTED_FUNCTION_BODY.render(**context)
         elif impl_type == 'simple':
+            return self.repo.SIMPLE_FUNCTION_BODY.render(**context)
+        
+        elif impl_type == 'inline':
             # For simple implementations, we might have inline code or use existing simple logic
             if context.get('inline_implementation'):
                 return self.repo.SIMPLE_INLINE_BODY.render(**context)
