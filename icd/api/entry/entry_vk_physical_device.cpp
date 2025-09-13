@@ -75,7 +75,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
     PhysicalDevice*              pPhysicalDevice = ApiPhysicalDevice::ObjectFromHandle(physicalDevice);
     const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pPhysicalDevice->VkInstance()->GetAllocCallbacks();
 
-    return pPhysicalDevice->CreateDevice(pCreateInfo, pAllocCB, pDevice);
+    return pPhysicalDevice->CreateDevice(
+		pCreateInfo,
+		pAllocCB,
+		pDevice);
 }
 
 // =====================================================================================================================
@@ -172,8 +175,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties(
     uint32_t*                                   pQueueFamilyPropertyCount,
     VkQueueFamilyProperties*                    pQueueFamilyProperties)
 {
-    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetQueueFamilyProperties(pQueueFamilyPropertyCount,
-        pQueueFamilyProperties);
+    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetQueueFamilyProperties(pQueueFamilyPropertyCount, pQueueFamilyProperties);
 }
 
 // =====================================================================================================================
@@ -340,9 +342,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFormatProperties2(
     VkFormat                                    format,
     VkFormatProperties2*                        pFormatProperties)
 {
-    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetFormatProperties2(
-                format,
-                pFormatProperties);
+    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetFormatProperties2(format, pFormatProperties);
 }
 
 // =====================================================================================================================
@@ -351,9 +351,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceImageFormatProperties2(
     const VkPhysicalDeviceImageFormatInfo2*     pImageFormatInfo,
     VkImageFormatProperties2*                   pImageFormatProperties)
 {
-    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetImageFormatProperties2(
-                        pImageFormatInfo,
-                        pImageFormatProperties);
+    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetImageFormatProperties2(pImageFormatInfo, pImageFormatProperties);
 }
 
 // =====================================================================================================================
@@ -362,9 +360,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMultisamplePropertiesEXT(
     VkSampleCountFlagBits                       samples,
     VkMultisamplePropertiesEXT*                 pMultisampleProperties)
 {
-    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetDeviceMultisampleProperties(
-        samples,
-        pMultisampleProperties);
+    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetDeviceMultisampleProperties(samples, pMultisampleProperties);
 }
 
 // =====================================================================================================================
@@ -373,9 +369,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties2(
     uint32_t*                                   pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2*                   pQueueFamilyProperties)
 {
-    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetQueueFamilyProperties(
-            pQueueFamilyPropertyCount,
-            pQueueFamilyProperties);
+    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetQueueFamilyProperties(pQueueFamilyPropertyCount, pQueueFamilyProperties);
 }
 
 // =====================================================================================================================
@@ -405,9 +399,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalBufferProperties(
     const VkPhysicalDeviceExternalBufferInfo*       pExternalBufferInfo,
     VkExternalBufferProperties*                     pExternalBufferProperties)
 {
-    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetExternalBufferProperties(
-            pExternalBufferInfo,
-            pExternalBufferProperties);
+    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetExternalBufferProperties(pExternalBufferInfo, pExternalBufferProperties);
 }
 
 // =====================================================================================================================
@@ -416,9 +408,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalSemaphoreProperties(
     const VkPhysicalDeviceExternalSemaphoreInfo*    pExternalSemaphoreInfo,
     VkExternalSemaphoreProperties*                  pExternalSemaphoreProperties)
 {
-    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetExternalSemaphoreProperties(
-            pExternalSemaphoreInfo,
-            pExternalSemaphoreProperties);
+    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetExternalSemaphoreProperties(pExternalSemaphoreInfo, pExternalSemaphoreProperties);
 }
 
 // =====================================================================================================================
@@ -427,9 +417,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalFenceProperties(
     const VkPhysicalDeviceExternalFenceInfo*    pExternalFenceInfo,
     VkExternalFenceProperties*                  pExternalFenceProperties)
 {
-    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetExternalFenceProperties(
-        pExternalFenceInfo,
-        pExternalFenceProperties);
+    ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetExternalFenceProperties(pExternalFenceInfo, pExternalFenceProperties);
 }
 
 #if defined(__unix__)
@@ -461,7 +449,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vkGetPhysicalDeviceXlibPresentationSupportKHR(
     VkPhysicalDevice                            physicalDevice,
     uint32_t                                    queueFamilyIndex,
     Display*                                    dpy,
-    VisualID                                    visualId)
+    VisualID                                    visualID)
 {
     Pal::OsDisplayHandle displayHandle = dpy;
     VkIcdWsiPlatform     platform      = VK_ICD_WSI_PLATFORM_XLIB;
@@ -542,8 +530,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceDisplayPropertiesKHR(
     VkDisplayPropertiesKHR*                     pProperties)
 {
     return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetDisplayProperties(
-                    pPropertyCount,
-                    utils::ArrayView<VkDisplayPropertiesKHR>(pProperties));
+        pPropertyCount,
+        utils::ArrayView<VkDisplayPropertiesKHR>(pProperties));
 }
 
 // =====================================================================================================================
@@ -553,8 +541,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceDisplayPlanePropertiesKHR(
     VkDisplayPlanePropertiesKHR*                pProperties)
 {
     return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetDisplayPlaneProperties(
-                    pPropertyCount,
-                    utils::ArrayView<VkDisplayPlanePropertiesKHR>(pProperties));
+        pPropertyCount,
+        utils::ArrayView<VkDisplayPlanePropertiesKHR>(pProperties));
 }
 
 // =====================================================================================================================
@@ -578,9 +566,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetDisplayModePropertiesKHR(
     VkDisplayModePropertiesKHR*                 pProperties)
 {
     return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetDisplayModeProperties(
-                                                display,
-                                                pPropertyCount,
-                                                utils::ArrayView<VkDisplayModePropertiesKHR>(pProperties));
+        display,
+        pPropertyCount,
+        utils::ArrayView<VkDisplayModePropertiesKHR>(pProperties));
 }
 
 // =====================================================================================================================
@@ -618,8 +606,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceDisplayProperties2KHR(
     VkDisplayProperties2KHR*                    pProperties)
 {
     return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetDisplayProperties(
-                    pPropertyCount,
-                    utils::ArrayView<VkDisplayPropertiesKHR>(pProperties, &pProperties->displayProperties));
+        pPropertyCount,
+        utils::ArrayView<VkDisplayPropertiesKHR>(pProperties, &pProperties->displayProperties));
 }
 
 // =====================================================================================================================
@@ -629,8 +617,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceDisplayPlaneProperties2KHR(
     VkDisplayPlaneProperties2KHR*               pProperties)
 {
     return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetDisplayPlaneProperties(
-                    pPropertyCount,
-                    utils::ArrayView<VkDisplayPlanePropertiesKHR>(pProperties, &pProperties->displayPlaneProperties));
+        pPropertyCount,
+        utils::ArrayView<VkDisplayPlanePropertiesKHR>(pProperties, &pProperties->displayPlaneProperties));
 }
 
 // =====================================================================================================================
@@ -653,9 +641,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetDisplayPlaneCapabilities2KHR(
     VkDisplayPlaneCapabilities2KHR*             pCapabilities)
 {
     return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetDisplayPlaneCapabilities(
-                                                                    pDisplayPlaneInfo->mode,
-                                                                    pDisplayPlaneInfo->planeIndex,
-                                                                    &pCapabilities->capabilities);
+        pDisplayPlaneInfo->mode,
+        pDisplayPlaneInfo->planeIndex,
+        &pCapabilities->capabilities);
 }
 
 // =====================================================================================================================
@@ -664,8 +652,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceSurfaceCapabilities2EXT(
     VkSurfaceKHR                                surface,
     VkSurfaceCapabilities2EXT*                  pSurfaceCapabilities)
 {
-    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetSurfaceCapabilities2EXT(surface,
-                                                                                           pSurfaceCapabilities);
+    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetSurfaceCapabilities2EXT(surface, pSurfaceCapabilities);
 }
 
 // =====================================================================================================================
@@ -674,8 +661,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceCalibrateableTimeDomainsEXT(
     uint32_t*                                   pTimeDomainCount,
     VkTimeDomainEXT*                            pTimeDomains)
 {
-    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetPhysicalDeviceCalibrateableTimeDomainsEXT(pTimeDomainCount,
-                                                                                                             pTimeDomains);
+    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetPhysicalDeviceCalibrateableTimeDomainsEXT(pTimeDomainCount, pTimeDomains);
 }
 
 // =====================================================================================================================
@@ -684,18 +670,15 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceToolProperties(
     uint32_t*                                   pToolCount,
     VkPhysicalDeviceToolPropertiesEXT*          pToolProperties)
 {
-    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetPhysicalDeviceToolPropertiesEXT(pToolCount,
-                                                                                                   pToolProperties);
+    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetPhysicalDeviceToolPropertiesEXT(pToolCount, pToolProperties);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceFragmentShadingRatesKHR(
     VkPhysicalDevice                        physicalDevice,
-    uint32*                                 pFragmentShadingRateCount,
+    uint32_t*                               pFragmentShadingRateCount,
     VkPhysicalDeviceFragmentShadingRateKHR* pFragmentShadingRates)
 {
-    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetFragmentShadingRates(
-        pFragmentShadingRateCount,
-        pFragmentShadingRates);
+    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetFragmentShadingRates(pFragmentShadingRateCount, pFragmentShadingRates);
 }
 
 // =====================================================================================================================
@@ -704,13 +687,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR
     uint32_t*                                   pPropertyCount,
     VkCooperativeMatrixPropertiesKHR*           pProperties)
 {
-    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetPhysicalDeviceCooperativeMatrixPropertiesKHR(
-        pPropertyCount,
-        pProperties);
-}
-
-}
-
+    return ApiPhysicalDevice::ObjectFromHandle(physicalDevice)->GetPhysicalDeviceCooperativeMatrixPropertiesKHR(pPropertyCount, pProperties);
 }
 
 } // namespace entry
