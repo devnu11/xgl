@@ -61,21 +61,26 @@ class ConfigLoader:
         with open(config_file, 'r') as f:
             data = json5.load(f)
         
-        # Load enhanced functions by file
+        # Load merged files structure
         self.enhanced_functions: Dict[str, List[FunctionOverride]] = {}
-        for file_name, functions in data["enhanced_functions"].items():
+        self.file_mappings: Dict[str, List[str]] = {}
+        
+        for file_name, file_config in data["files"].items():
+            # Extract function list (preserving order)
+            self.file_mappings[file_name] = file_config["functions"]
+            
+            # Extract enhanced function specifications
             self.enhanced_functions[file_name] = []
-            for func_config in functions:
+            enhanced_specs = file_config.get("enhanced", {})
+            
+            for func_name, func_config in enhanced_specs.items():
                 override = FunctionOverride(
-                    name=func_config["name"],
+                    name=func_name,
                     method=func_config.get("method"),
                     impl=func_config.get("impl"),
                     return_value=func_config.get("return")
                 )
                 self.enhanced_functions[file_name].append(override)
-        
-        # Load file mappings
-        self.file_mappings: Dict[str, List[str]] = data["file_mappings"]
     
     # Methods to replace scattered mappings throughout the codebase
     
