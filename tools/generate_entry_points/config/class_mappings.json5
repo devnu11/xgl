@@ -1,27 +1,31 @@
 {
+  // XGL Class Mapping Configuration
+  // Maps Vulkan handle types to XGL class names and their properties
   "classes": {
     "Buffer": {
       "vk_handle_type": "VkBuffer",
       "xgl_class_name": "Buffer",
-      "api_prefix": false,
-      "function_prefix_to_strip": "Buffer",
+      "api_prefix": false,  // Whether to prefix with "Api" (e.g., ApiBuffer vs Buffer)
+      "function_prefix_to_strip": "Buffer",  // Remove "Buffer" from function names when generating method names
       "embedded_handles": {
+        // Struct types that contain embedded handles of this type
         "struct_types": ["VkBufferMemoryRequirementsInfo2", "VkBufferDeviceAddressInfo"],
+        // How to access the embedded handle from each struct
         "access_patterns": {
           "VkBufferMemoryRequirementsInfo2": "pInfo->buffer",
-          "VkBufferDeviceAddressInfo": "pInfo->buffer"
-        }
-      }
+          "VkBufferDeviceAddressInfo": "pInfo->buffer",
+        },
+      },
     },
     "CmdBuffer": {
       "vk_handle_type": "VkCommandBuffer", 
       "xgl_class_name": "CmdBuffer",
-      "api_prefix": true,
-      "function_prefix_to_strip": "CommandBuffer",
+      "api_prefix": true,  // Use ApiCmdBuffer instead of CmdBuffer
+      "function_prefix_to_strip": "CommandBuffer",  // Strip "CommandBuffer" prefix from method names
       "embedded_handles": {
-        "struct_types": [],
-        "access_patterns": {}
-      }
+        "struct_types": [],  // No embedded handles for command buffers
+        "access_patterns": {},
+      },
     },
     "CmdPool": {
       "vk_handle_type": "VkCommandPool",
@@ -76,12 +80,12 @@
     "Device": {
       "vk_handle_type": "VkDevice",
       "xgl_class_name": "Device",
-      "api_prefix": true,
+      "api_prefix": true,  // Core class - use ApiDevice
       "function_prefix_to_strip": "Device",
       "embedded_handles": {
         "struct_types": [],
-        "access_patterns": {}
-      }
+        "access_patterns": {},
+      },
     },
     "Fence": {
       "vk_handle_type": "VkFence",
@@ -248,8 +252,8 @@
       "function_prefix_to_strip": "Surface",
       "embedded_handles": {
         "struct_types": [],
-        "access_patterns": {}
-      }
-    }
-  }
+        "access_patterns": {},
+      },
+    },
+  },
 }

@@ -1,16 +1,20 @@
 {
+  // Enhanced Function Configuration
+  // Defines custom method names, implementation types, and return values for specific functions
   "enhanced_functions": {
+    // Buffer operations - basic resource management
     "buffer": [
       {"name": "vkDestroyBuffer", "method": "Destroy"},
       {"name": "vkBindBufferMemory", "method": "BindMemory"},
       {"name": "vkGetBufferMemoryRequirements", "method": "GetMemoryRequirements"},
       {"name": "vkGetBufferMemoryRequirements2", "method": "GetMemoryRequirements"},
-      {"name": "vkGetBufferDeviceAddress", "method": "GpuVirtAddr"},
-      {"name": "vkGetBufferOpaqueCaptureAddress", "method": "GpuVirtAddr"}
+      {"name": "vkGetBufferDeviceAddress", "method": "GpuVirtAddr"},  // Custom XGL method name
+      {"name": "vkGetBufferOpaqueCaptureAddress", "method": "GpuVirtAddr"},
     ],
     "buffer_view": [
-      {"name": "vkDestroyBufferView", "method": "Destroy"}
+      {"name": "vkDestroyBufferView", "method": "Destroy"},
     ],
+    // Command buffer operations - recording and execution
     "cmd_buffer": [
       {"name": "vkBeginCommandBuffer", "method": "Begin"},
       {"name": "vkEndCommandBuffer", "method": "End"},
@@ -38,11 +42,12 @@
       {"name": "vkResetCommandPool", "method": "Reset"},
       {"name": "vkTrimCommandPool", "method": "Trim"}
     ],
+    // Deferred operations for asynchronous execution
     "deferred_operation": [
       {"name": "vkDestroyDeferredOperationKHR", "method": "Destroy"},
       {"name": "vkGetDeferredOperationResultKHR", "method": "GetResult"},
       {"name": "vkGetDeferredOperationMaxConcurrencyKHR", "method": "GetMaxConcurrency"},
-      {"name": "vkDeferredOperationJoinKHR", "method": "Join"}
+      {"name": "vkDeferredOperationJoinKHR", "method": "Join"},  // The function that started this whole migration!
     ],
     "descriptor_pool": [
       {"name": "vkDestroyDescriptorPool", "method": "Destroy"},
@@ -59,8 +64,9 @@
       {"name": "vkGetDescriptorSetLayoutSupport", "method": "GetLayoutSupport"},
       {"name": "vkGetDescriptorSetLayoutSupportKHR", "method": "GetLayoutSupport"}
     ],
+    // Core device operations
     "device": [
-      {"name": "vkEnumerateDeviceLayerProperties", "impl": "success_only", "return": "VK_SUCCESS"}
+      {"name": "vkEnumerateDeviceLayerProperties", "impl": "success_only", "return": "VK_SUCCESS"},  // Stub - no layers to enumerate
     ],
     "fence": [
       {"name": "vkDestroyFence", "method": "Destroy"},
@@ -90,18 +96,19 @@
       {"name": "vkEnumerateInstanceLayerProperties", "impl": "success_only", "return": "VK_SUCCESS"},
       {"name": "vkEnumerateInstanceVersion", "impl": "success_only", "return": "VK_SUCCESS"}
     ],
+    // Memory management operations
     "memory": [
       {"name": "vkFreeMemory", "method": "Free"},
       {"name": "vkMapMemory", "method": "Map"},
       {"name": "vkUnmapMemory", "method": "Unmap"},
       {"name": "vkMapMemory2", "method": "Map"},
       {"name": "vkUnmapMemory2", "method": "Unmap"},
-      {"name": "vkFlushMappedMemoryRanges", "impl": "success_only", "return": "VK_SUCCESS"},
-      {"name": "vkInvalidateMappedMemoryRanges", "impl": "success_only", "return": "VK_SUCCESS"},
+      {"name": "vkFlushMappedMemoryRanges", "impl": "success_only", "return": "VK_SUCCESS"},  // No-op for XGL
+      {"name": "vkInvalidateMappedMemoryRanges", "impl": "success_only", "return": "VK_SUCCESS"},  // No-op for XGL
       {"name": "vkGetDeviceMemoryCommitment", "method": "GetCommitment"},
       {"name": "vkGetMemoryFdKHR", "method": "GetMemoryFd"},
-      {"name": "vkGetMemoryFdPropertiesKHR", "impl": "success_only", "return": "VK_SUCCESS"},
-      {"name": "vkGetDeviceMemoryOpaqueCaptureAddress", "method": "GetOpaqueCaptureAddress"}
+      {"name": "vkGetMemoryFdPropertiesKHR", "impl": "success_only", "return": "VK_SUCCESS"},  // Platform support stub
+      {"name": "vkGetDeviceMemoryOpaqueCaptureAddress", "method": "GetOpaqueCaptureAddress"},
     ],
     "physical_device": [
       {"name": "vkGetPhysicalDeviceProperties2", "method": "GetDeviceProperties2"},
@@ -165,9 +172,12 @@
       {"name": "vkDestroyShaderModule", "method": "Destroy"}
     ],
     "surface": [
-      {"name": "vkDestroySurfaceKHR", "method": "Destroy"}
-    ]
+      {"name": "vkDestroySurfaceKHR", "method": "Destroy"},
+    ],
   },
+  
+  // File Function Mappings
+  // Maps each entry point file to the functions it should contain
   "file_mappings": {
     "buffer": [
       "vkDestroyBuffer",
@@ -427,13 +437,13 @@
       "vkDestroySemaphore",
       "vkGetSemaphoreCounterValue",
       "vkWaitSemaphores",
-      "vkSignalSemaphore"
+      "vkSignalSemaphore",
     ],
     "shader_module": [
-      "vkDestroyShaderModule"
+      "vkDestroyShaderModule",
     ],
     "surface": [
-      "vkDestroySurfaceKHR"
-    ]
-  }
+      "vkDestroySurfaceKHR",
+    ],
+  },
 }

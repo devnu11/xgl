@@ -1,6 +1,6 @@
 """Configuration loader for XGL entry point generator."""
 
-import json
+import json5
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
@@ -40,9 +40,9 @@ class ConfigLoader:
     
     def _load_class_mappings(self):
         """Load class mapping configuration."""
-        config_file = self.config_dir / "class_mappings.json"
+        config_file = self.config_dir / "class_mappings.json5"
         with open(config_file, 'r') as f:
-            data = json.load(f)
+            data = json5.load(f)
         
         self.classes: Dict[str, ClassConfig] = {}
         for class_name, config in data["classes"].items():
@@ -57,9 +57,9 @@ class ConfigLoader:
     
     def _load_function_overrides(self):
         """Load function override configuration."""
-        config_file = self.config_dir / "function_overrides.json"
+        config_file = self.config_dir / "function_overrides.json5"
         with open(config_file, 'r') as f:
-            data = json.load(f)
+            data = json5.load(f)
         
         # Load enhanced functions by file
         self.enhanced_functions: Dict[str, List[FunctionOverride]] = {}
