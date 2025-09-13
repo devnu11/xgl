@@ -278,6 +278,17 @@ class EntryPointGenerator:
                     {'name': 'vkEnumerateInstanceExtensionProperties', 'impl': 'static_member_call', 'method': 'EnumerateExtensionProperties'}
                 ]
             },
+            'memory': {
+                'functions': [
+                    {'name': 'vkFlushMappedMemoryRanges', 'impl': 'success_only', 'return': 'VK_SUCCESS'}, # All of our host visible memory heaps are coherent
+                    {'name': 'vkInvalidateMappedMemoryRanges', 'impl': 'success_only', 'return': 'VK_SUCCESS'}, # All of our host visible memory heaps are coherent
+                ]
+            },
+            'physical_device': {
+                'functions': [
+                    {'name': 'vkEnumerateDeviceLayerProperties', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
+                ]
+            },
 
         }
     
@@ -738,8 +749,12 @@ class EntryPointGenerator:
         impl_method = getattr(command, 'impl_method', None)
         impl_return = getattr(command, 'impl_return', None)
         
-        # Use impl_method if specified, otherwise fall back to type mapper
-        method_name = impl_method if impl_method else self.type_mapper.get_method_name(command.name)
+        # Use impl_method if specified, otherwise fall back to type mapper with target class context
+        if impl_method:
+            method_name = impl_method
+        else:
+            target_class = self.type_mapper.get_xgl_type(first_handle.type_name) if first_handle else None
+            method_name = self.type_mapper.get_method_name(command.name, target_class)
         
         # Build basic context
         # For global functions (no handle), don't skip first parameter

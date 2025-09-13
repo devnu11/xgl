@@ -64,11 +64,59 @@ class TypeMapper:
         prefix = "Api" if xgl_type in self.API_PREFIX_CLASSES else ""
         return f"{prefix}{xgl_type}::ObjectFromHandle"
     
-    def get_method_name(self, function_name: str) -> str:
-        """Convert Vulkan function name to XGL method name."""
-        if function_name.startswith('vk'):
-            return function_name[2:]  # Remove 'vk' prefix
-        return function_name
+    def get_method_name(self, function_name: str, target_class: str = None) -> str:
+        """Convert Vulkan function name to XGL method name with context-aware class prefix removal."""
+        if not function_name.startswith('vk'):
+            return function_name
+        
+        # Remove 'vk' prefix
+        method_name = function_name[2:]
+        
+        # If we have a target class, try to remove its prefix from the method name
+        if target_class:
+            # Map common Vulkan handle types to their class prefixes in function names
+            class_to_function_prefix = {
+                'PhysicalDevice': 'PhysicalDevice',
+                'Device': 'Device',
+                'Instance': 'Instance', 
+                'Image': 'Image',
+                'Buffer': 'Buffer',
+                'Pipeline': 'Pipeline',
+                'RenderPass': 'RenderPass',
+                'Framebuffer': 'Framebuffer',
+                'CommandPool': 'CommandPool',
+                'CmdBuffer': 'CommandBuffer',  # VkCommandBuffer -> CmdBuffer class, but vkCmd* functions
+                'DescriptorSet': 'DescriptorSet',
+                'DescriptorPool': 'DescriptorPool',
+                'Sampler': 'Sampler',
+                'ImageView': 'ImageView',
+                'BufferView': 'BufferView',
+                'ShaderModule': 'ShaderModule',
+                'PipelineLayout': 'PipelineLayout',
+                'DescriptorSetLayout': 'DescriptorSetLayout',
+                'Fence': 'Fence',
+                'Semaphore': 'Semaphore',
+                'Event': 'Event',
+                'QueryPool': 'QueryPool',
+                'Surface': 'Surface',
+            }
+            
+            # Get the prefix that should appear in function names for this class
+            function_prefix = class_to_function_prefix.get(target_class)
+            if function_prefix:
+                # Try to remove the prefix from anywhere in the method name
+                # Common patterns: GetPhysicalDeviceFeatures -> GetFeatures, GetImageMemoryRequirements -> GetMemoryRequirements
+                if function_prefix in method_name:
+                    # Replace the first occurrence of the class prefix
+                    method_name = method_name.replace(function_prefix, '', 1)
+                    
+                    # Clean up any remaining artifacts and ensure it starts with uppercase
+                    if method_name and not method_name[0].isupper():
+                        # If it doesn't start with uppercase, it's probably not a clean removal
+                        # Restore original
+                        method_name = function_name[2:]
+        
+        return method_name
     
     def needs_allocator_logic(self, function_name: str) -> bool:
         """Check if function needs allocator callback logic."""
