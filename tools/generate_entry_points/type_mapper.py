@@ -85,7 +85,7 @@ class TypeMapper:
                 'Pipeline': 'Pipeline',
                 'RenderPass': 'RenderPass',
                 'Framebuffer': 'Framebuffer',
-                'CommandPool': 'CommandPool',
+                'CmdPool': 'CommandPool',
                 'CmdBuffer': 'CommandBuffer',  # VkCommandBuffer -> CmdBuffer class, but vkCmd* functions
                 'DescriptorSet': 'DescriptorSet',
                 'DescriptorPool': 'DescriptorPool',
