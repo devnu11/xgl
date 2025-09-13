@@ -1,0 +1,255 @@
+{
+  "classes": {
+    "Buffer": {
+      "vk_handle_type": "VkBuffer",
+      "xgl_class_name": "Buffer",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Buffer",
+      "embedded_handles": {
+        "struct_types": ["VkBufferMemoryRequirementsInfo2", "VkBufferDeviceAddressInfo"],
+        "access_patterns": {
+          "VkBufferMemoryRequirementsInfo2": "pInfo->buffer",
+          "VkBufferDeviceAddressInfo": "pInfo->buffer"
+        }
+      }
+    },
+    "CmdBuffer": {
+      "vk_handle_type": "VkCommandBuffer", 
+      "xgl_class_name": "CmdBuffer",
+      "api_prefix": true,
+      "function_prefix_to_strip": "CommandBuffer",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "CmdPool": {
+      "vk_handle_type": "VkCommandPool",
+      "xgl_class_name": "CmdPool", 
+      "api_prefix": false,
+      "function_prefix_to_strip": "CommandPool",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "DeferredOperation": {
+      "vk_handle_type": "VkDeferredOperationKHR",
+      "xgl_class_name": "DeferredOperation",
+      "api_prefix": false,
+      "function_prefix_to_strip": "DeferredOperation",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "DescriptorPool": {
+      "vk_handle_type": "VkDescriptorPool",
+      "xgl_class_name": "DescriptorPool",
+      "api_prefix": false,
+      "function_prefix_to_strip": "DescriptorPool",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "DescriptorSet": {
+      "vk_handle_type": "VkDescriptorSet",
+      "xgl_class_name": "DescriptorSet",
+      "api_prefix": false,
+      "function_prefix_to_strip": "DescriptorSet",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "DescriptorSetLayout": {
+      "vk_handle_type": "VkDescriptorSetLayout",
+      "xgl_class_name": "DescriptorSetLayout",
+      "api_prefix": false,
+      "function_prefix_to_strip": "DescriptorSetLayout",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Device": {
+      "vk_handle_type": "VkDevice",
+      "xgl_class_name": "Device",
+      "api_prefix": true,
+      "function_prefix_to_strip": "Device",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Fence": {
+      "vk_handle_type": "VkFence",
+      "xgl_class_name": "Fence",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Fence",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Framebuffer": {
+      "vk_handle_type": "VkFramebuffer",
+      "xgl_class_name": "Framebuffer",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Framebuffer",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Image": {
+      "vk_handle_type": "VkImage",
+      "xgl_class_name": "Image",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Image",
+      "embedded_handles": {
+        "struct_types": ["VkImageMemoryRequirementsInfo2", "VkImageSparseMemoryRequirementsInfo2"],
+        "access_patterns": {
+          "VkImageMemoryRequirementsInfo2": "pInfo->image",
+          "VkImageSparseMemoryRequirementsInfo2": "pInfo->image"
+        }
+      }
+    },
+    "ImageView": {
+      "vk_handle_type": "VkImageView",
+      "xgl_class_name": "ImageView",
+      "api_prefix": false,
+      "function_prefix_to_strip": "ImageView",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Instance": {
+      "vk_handle_type": "VkInstance",
+      "xgl_class_name": "Instance",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Instance",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Memory": {
+      "vk_handle_type": "VkDeviceMemory",
+      "xgl_class_name": "Memory",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Memory",
+      "embedded_handles": {
+        "struct_types": ["VkMemoryMapInfo", "VkMemoryUnmapInfo", "VkMemoryGetFdInfoKHR", "VkDeviceMemoryOpaqueCaptureAddressInfo"],
+        "access_patterns": {
+          "VkMemoryMapInfo": "pMemoryMapInfo->memory",
+          "VkMemoryUnmapInfo": "pMemoryUnmapInfo->memory",
+          "VkMemoryGetFdInfoKHR": "pGetFdInfo->memory",
+          "VkDeviceMemoryOpaqueCaptureAddressInfo": "pInfo->memory"
+        }
+      }
+    },
+    "PhysicalDevice": {
+      "vk_handle_type": "VkPhysicalDevice",
+      "xgl_class_name": "PhysicalDevice",
+      "api_prefix": true,
+      "function_prefix_to_strip": "PhysicalDevice",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Pipeline": {
+      "vk_handle_type": "VkPipeline",
+      "xgl_class_name": "Pipeline",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Pipeline",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "PipelineLayout": {
+      "vk_handle_type": "VkPipelineLayout",
+      "xgl_class_name": "PipelineLayout",
+      "api_prefix": false,
+      "function_prefix_to_strip": "PipelineLayout",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "QueryPool": {
+      "vk_handle_type": "VkQueryPool",
+      "xgl_class_name": "QueryPool",
+      "api_prefix": false,
+      "function_prefix_to_strip": "QueryPool",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Queue": {
+      "vk_handle_type": "VkQueue",
+      "xgl_class_name": "Queue",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Queue",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "RenderPass": {
+      "vk_handle_type": "VkRenderPass",
+      "xgl_class_name": "RenderPass",
+      "api_prefix": false,
+      "function_prefix_to_strip": "RenderPass",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Sampler": {
+      "vk_handle_type": "VkSampler",
+      "xgl_class_name": "Sampler",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Sampler",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Semaphore": {
+      "vk_handle_type": "VkSemaphore",
+      "xgl_class_name": "Semaphore",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Semaphore",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "ShaderModule": {
+      "vk_handle_type": "VkShaderModule",
+      "xgl_class_name": "ShaderModule",
+      "api_prefix": false,
+      "function_prefix_to_strip": "ShaderModule",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    },
+    "Surface": {
+      "vk_handle_type": "VkSurfaceKHR",
+      "xgl_class_name": "Surface",
+      "api_prefix": false,
+      "function_prefix_to_strip": "Surface",
+      "embedded_handles": {
+        "struct_types": [],
+        "access_patterns": {}
+      }
+    }
+  }
+}

@@ -2,40 +2,41 @@
 
 from typing import Dict, Optional, Set
 from xml_parser import Parameter, Command
+from config_loader import ConfigLoader
 
 
 class TypeMapper:
     """Maps Vulkan types to XGL equivalents and generates conversions."""
     
-    # Special cases that don't follow the simple "strip Vk prefix" rule
-    HANDLE_MAPPINGS: Dict[str, str] = {
-        'VkCommandBuffer': 'CmdBuffer',
-        'VkCommandPool': 'CmdPool',
-        'VkDeviceMemory': 'Memory',
-        'VkSurfaceKHR': 'Surface'
-    }
+    def __init__(self):
+        self.includes_cache: Dict[str, Set[str]] = {}
+        self.config = ConfigLoader()
+        
+        # Cached properties from config
+        self._handle_mappings = None
+        self._api_prefix_classes = None
     
-    # Classes that use the Api prefix
-    API_PREFIX_CLASSES: Set[str] = {
-        'CmdBuffer',
-        'Device',
-        'HwShaderMapping',
-        'PhysicalDevice',
-        'Queue',
-        'ShaderFromHwShader',
-        'ShaderStageCompute',
-        'ShaderStageDomain',
-        'ShaderStageGeometry',
-        'ShaderStageHull',
-        'ShaderStageMesh',
-        'ShaderStagePixel',
-        'ShaderStageTask',
-        'ShaderStageVertex',
-        'ShaderType',
-        'StageNames',
-        'String',
-        'Version'
-    }
+    @property
+    def HANDLE_MAPPINGS(self) -> Dict[str, str]:
+        """Get handle mappings from config."""
+        if self._handle_mappings is None:
+            self._handle_mappings = self.config.get_handle_mappings()
+        return self._handle_mappings
+    
+    @property  
+    def API_PREFIX_CLASSES(self) -> Set[str]:
+        """Get API prefix classes from config."""
+        if self._api_prefix_classes is None:
+            # Include both config-based classes and legacy hardcoded ones
+            config_classes = set(self.config.get_api_prefix_classes())
+            legacy_classes = {
+                'HwShaderMapping', 'ShaderFromHwShader', 'ShaderStageCompute',
+                'ShaderStageDomain', 'ShaderStageGeometry', 'ShaderStageHull',
+                'ShaderStageMesh', 'ShaderStagePixel', 'ShaderStageTask',
+                'ShaderStageVertex', 'ShaderType', 'StageNames', 'String', 'Version'
+            }
+            self._api_prefix_classes = config_classes | legacy_classes
+        return self._api_prefix_classes
     
     # Functions that need allocator callback handling
     ALLOCATOR_FUNCTIONS: Set[str] = {
@@ -43,9 +44,6 @@ class TypeMapper:
         'vkCreateSemaphore', 'vkCreateEvent', 'vkAllocateMemory',
         'vkCreatePipeline', 'vkCreateRenderPass', 'vkCreateFramebuffer'
     }
-    
-    def __init__(self):
-        self.includes_cache: Dict[str, Set[str]] = {}
     
     def get_xgl_type(self, vk_type: str) -> str:
         """Map Vulkan type to XGL type."""
@@ -75,35 +73,11 @@ class TypeMapper:
         
         # If we have a target class, try to remove its prefix from the method name
         if target_class:
-            # Map common Vulkan handle types to their class prefixes in function names
-            class_to_function_prefix = {
-                'PhysicalDevice': 'PhysicalDevice',
-                'Device': 'Device',
-                'Instance': 'Instance', 
-                'Image': 'Image',
-                'Buffer': 'Buffer',
-                'Pipeline': 'Pipeline',
-                'RenderPass': 'RenderPass',
-                'Framebuffer': 'Framebuffer',
-                'CmdPool': 'CommandPool',
-                'CmdBuffer': 'CommandBuffer',  # VkCommandBuffer -> CmdBuffer class, but vkCmd* functions
-                'DescriptorSet': 'DescriptorSet',
-                'DescriptorPool': 'DescriptorPool',
-                'Sampler': 'Sampler',
-                'ImageView': 'ImageView',
-                'BufferView': 'BufferView',
-                'ShaderModule': 'ShaderModule',
-                'PipelineLayout': 'PipelineLayout',
-                'DescriptorSetLayout': 'DescriptorSetLayout',
-                'Fence': 'Fence',
-                'Semaphore': 'Semaphore',
-                'Event': 'Event',
-                'QueryPool': 'QueryPool',
-                'Surface': 'Surface',
-            }
+            # Get function prefix mappings from config
+            function_prefix_mappings = self.config.get_function_prefix_mappings()
             
             # Get the prefix that should appear in function names for this class
-            function_prefix = class_to_function_prefix.get(target_class)
+            function_prefix = function_prefix_mappings.get(target_class)
             if function_prefix:
                 # Try to remove the prefix from anywhere in the method name
                 # Common patterns: GetPhysicalDeviceFeatures -> GetFeatures, GetImageMemoryRequirements -> GetMemoryRequirements

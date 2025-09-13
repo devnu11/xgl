@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 from xml_parser import VulkanRegistryParser, Command, CommandType
 from template_engine import TemplateEngine
 from type_mapper import TypeMapper
+from config_loader import ConfigLoader
 
 
 class EntryPointGenerator:
@@ -17,6 +18,7 @@ class EntryPointGenerator:
         self.output_dir = output_dir
         self.template_engine = TemplateEngine()
         self.type_mapper = TypeMapper()
+        self.config = ConfigLoader()
         self.logger = logging.getLogger(__name__)
         self.verbose = False
         
@@ -159,503 +161,69 @@ class EntryPointGenerator:
         
         return groups
     
-    def _get_enhanced_file_mappings(self) -> Dict[str, Dict[str, any]]:
+    def _get_enhanced_file_mappings(self) -> Dict[str, Dict[str, List]]:
         """Get enhanced mapping with implementation metadata for select files."""
-        return {
-            'buffer': {
+        result = {}
+        for file_name in self.config.enhanced_functions:
+            result[file_name] = {
                 'functions': [
-                    {'name': 'vkDestroyBuffer', 'impl': 'standard', 'method': 'Destroy'},
-                    {'name': 'vkBindBufferMemory', 'impl': 'standard', 'method': 'BindMemory'},
-                    {'name': 'vkGetBufferMemoryRequirements', 'impl': 'standard', 'method': 'GetMemoryRequirements'},
-                    {'name': 'vkGetBufferMemoryRequirements2', 'impl': 'standard', 'method': 'GetMemoryRequirements'},
-                    {'name': 'vkGetBufferDeviceAddress', 'impl': 'standard', 'method': 'GpuVirtAddr'},
-                    {'name': 'vkGetBufferOpaqueCaptureAddress', 'impl': 'standard', 'method': 'GpuVirtAddr'}
+                    {
+                        'name': override.name,
+                        'impl': override.impl if override.impl else 'standard',
+                        'method': override.method,
+                        'return': override.return_value
+                    }
+                    for override in self.config.get_enhanced_function_overrides(file_name)
                 ]
-            },
-            'buffer_view': {
-                'functions': [
-                    {'name': 'vkDestroyBufferView', 'impl': 'standard', 'method': 'Destroy'}
-                ]
-            },
-            'cmd_buffer': {
-                'functions': [
-                    # Examples of different patterns found in cmd_buffer
-                    {'name': 'vkBeginCommandBuffer', 'impl': 'standard', 'method': 'Begin'},
-                    {'name': 'vkEndCommandBuffer', 'impl': 'standard', 'method': 'End'},
-                    {'name': 'vkResetCommandBuffer', 'impl': 'standard', 'method': 'Reset'},
-                    {'name': 'vkCmdDispatchBase', 'impl': 'standard', 'method': 'DispatchOffset'},
-                    {'name': 'vkCmdBlitImage2', 'impl': 'standard', 'method': 'BlitImage'},
-                    {'name': 'vkCmdCopyBuffer2', 'impl': 'standard', 'method': 'CopyBuffer'},
-                    {'name': 'vkCmdCopyBufferToImage2', 'impl': 'standard', 'method': 'CopyBufferToImage'},
-                    {'name': 'vkCmdCopyImage2', 'impl': 'standard', 'method': 'CopyImage'},
-                    {'name': 'vkCmdCopyImageToBuffer2', 'impl': 'standard', 'method': 'CopyImageToBuffer'},
-                    {'name': 'vkCmdResolveImage2', 'impl': 'standard', 'method': 'ResolveImage'},
-                    {'name': 'vkCmdBindPipelineShaderGroupNV', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdUpdatePipelineIndirectBufferNV', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdPreprocessGeneratedCommandsEXT', 'impl': 'empty'},
-                    {'name': 'vkCmdInsertDebugUtilsLabelEXT', 'impl': 'empty'},
-                    {'name': 'vkCmdSetDepthBias2EXT', 'impl': 'empty'},
-                    {'name': 'vkCmdSetDescriptorBufferOffsets2EXT', 'impl': 'standard', 'method': 'SetDescriptorBufferOffsets2EXT'},
-                    {'name': 'vkCmdSetStencilOp', 'impl': 'standard', 'method': 'SetStencilOpEXT'},
-                    {'name': 'vkCmdBuildMicromapsEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdCopyMemoryToMicromapEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdCopyMicromapEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdCopyMicromapToMemoryEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdWriteMicromapsPropertiesEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdSetPatchControlPointsEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdSetAlphaToOneEnableEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdSetRasterizationStreamEXT', 'impl': 'not_implemented'},
-                    {'name': 'vkCmdSetColorBlendAdvancedEXT', 'impl': 'never_called'},
-                    # Functions that use cmd_buffer GetEntryPoints pattern
-                    {'name': 'vkCmdBindDescriptorSets', 'impl': 'cmd_buffer_entry_points'},
-                    {'name': 'vkCmdBindDescriptorSets2', 'impl': 'cmd_buffer_entry_points'},
-                    {'name': 'vkCmdPushDescriptorSet2', 'impl': 'cmd_buffer_entry_points'},
-                    {'name': 'vkCmdPushDescriptorSetWithTemplate2', 'impl': 'cmd_buffer_entry_points'},
-                    {'name': 'vkCmdPushDescriptorSet', 'impl': 'cmd_buffer_entry_points'},
-                    {'name': 'vkCmdPushDescriptorSetWithTemplate', 'impl': 'cmd_buffer_entry_points'}
-                    # Add more as needed...
-                ]
-            },
-            'image': {
-                'functions': [
-                    {'name': 'vkDestroyImage', 'impl': 'standard', 'method': 'Destroy'},
-                    {'name': 'vkCopyImageToImage', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'},
-                    {'name': 'vkCopyImageToMemory', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'},
-                    {'name': 'vkCopyMemoryToImage', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'},
-                    {'name': 'vkTransitionImageLayout', 'impl': 'not_implemented', 'return': 'VK_ERROR_UNKNOWN'}
-                ]
-            },
-            'device': {
-                'functions': [
-                    {'name': 'vkGetDeviceQueue', 'impl': 'standard', 'method': 'GetQueue'},
-                    {'name': 'vkGetDeviceQueue2', 'impl': 'standard', 'method': 'GetQueue2'},
-                    {'name': 'vkDeviceWaitIdle', 'impl': 'standard', 'method': 'WaitIdle'},
-                    {'name': 'vkBindImageMemory2', 'impl': 'standard', 'method': 'BindImageMemory'},
-                    {'name': 'vkBuildAccelerationStructuresKHR', 'impl': 'standard', 'method': 'BuildAccelerationStructure'},
-                    {'name': 'vkDebugMarkerSetObjectTagEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
-                    {'name': 'vkDebugMarkerSetObjectNameEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
-                    {'name': 'vkSetDebugUtilsObjectTagEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
-                    {'name': 'vkCreateIndirectExecutionSetEXT', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
-                    {'name': 'vkDestroyIndirectExecutionSetEXT', 'impl': 'empty'},
-                    {'name': 'vkUpdateIndirectExecutionSetPipelineEXT', 'impl': 'empty'},
-                    {'name': 'vkUpdateIndirectExecutionSetShaderEXT', 'impl': 'empty'},
-                ]
-            },
-            'debug_report': {
-                'functions': [
-                    {'name': 'vkCreateDebugReportCallbackEXT', 'impl': 'standard', 'method': 'Create'},
-                    {'name': 'vkDebugReportMessageEXT', 'impl': 'standard', 'method': 'CallExternalCallbacks'},
-                ]
-            },
-            'deferred_operation': {
-                'functions': [
-                    {'name': 'vkGetDeferredOperationResultKHR', 'impl': 'standard', 'method': 'GetOperationResult'},
-                    {'name': 'vkGetDeferredOperationMaxConcurrencyKHR', 'impl': 'standard', 'method': 'GetMaxConcurrency'},
-                    {'name': 'vkDeferredOperationJoinKHR', 'impl': 'standard', 'method': 'Join'},
-                ]
-            },
-            'descriptor_buffer': {
-                'functions': [
-                ]
-            },
-            'descriptor_set': {
-                'functions': [
-                    {'name': 'vkUpdateDescriptorSets', 'impl': 'entry_points'}
-                ]
-            },
-            'descriptor_pool': {
-                'functions': [
-                    {'name': 'vkCreateDescriptorPool', 'impl': 'entry_points'},
-                    {'name': 'vkFreeDescriptorSets', 'impl': 'entry_points'},
-                    {'name': 'vkResetDescriptorPool', 'impl': 'entry_points'},
-                    {'name': 'vkAllocateDescriptorSets', 'impl': 'entry_points'}
-                ]
-            },
-            'instance': {
-                'functions': [
-                    {'name': 'vkEnumerateInstanceVersion', 'impl': 'static_member_call', 'method': 'EnumerateVersion'},
-                    {'name': 'vkCreateInstance', 'impl': 'static_member_call', 'method': 'Create'},
-                    {'name': 'vkEnumerateInstanceExtensionProperties', 'impl': 'static_member_call', 'method': 'EnumerateExtensionProperties'}
-                ]
-            },
-            'physical_device': {
-                'functions': [
-                    {'name': 'vkEnumerateDeviceLayerProperties', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
-                ]
-            },
-            'memory': {
-                'functions': [
-                    {'name': 'vkFlushMappedMemoryRanges', 'impl': 'success_only', 'return': 'VK_SUCCESS'}, # All of our host visible memory heaps are coherent
-                    {'name': 'vkInvalidateMappedMemoryRanges', 'impl': 'success_only', 'return': 'VK_SUCCESS'}, # All of our host visible memory heaps are coherent
-                    #{'name': 'vkUnmapMemory2', 'impl': 'method', 'method': 'Unmap', 'return': 'VK_SUCCESS'},
-                    {'name': 'vkGetDeviceMemoryCommitment', 'method': 'GetCommitment'}
-                ]
-            },
-            'physical_device': {
-                'functions': [
-                    {'name': 'vkGetPhysicalDeviceProperties2', 'method': 'GetDeviceProperties2'},
-                    {'name': 'vkGetPhysicalDeviceMultisamplePropertiesEXT', 'method': 'GetDeviceMultisampleProperties'},
-                    {'name': 'vkGetPhysicalDeviceQueueFamilyProperties2', 'method': 'GetQueueFamilyProperties'},
-                    {'name': 'vkAcquireXlibDisplayEXT', 'method': 'AcquireXlibDisplay'},
-                    {'name': 'vkGetRandROutputDisplayEXT', 'method': 'GetRandROutputDisplay'},
-                    {'name': 'vkReleaseDisplayEXT', 'method': 'ReleaseDisplay'},
-                    {'name': 'vkGetPhysicalDevicePresentRectanglesKHR', 'method': 'GetPhysicalDevicePresentRectangles'},
-                    {'name': 'vkGetDisplayPlaneSupportedDisplaysKHR', 'method': 'GetDisplayPlaneSupportedDisplays'},
-                    {'name': 'vkGetDisplayModePropertiesKHR', 'method': 'GetDisplayModeProperties'},
-                    {'name': 'vkCreateDisplayModeKHR', 'method': 'CreateDisplayMode'},
-                    {'name': 'vkGetDisplayPlaneCapabilitiesKHR', 'method': 'GetDisplayPlaneCapabilities'},
-                    {'name': 'vkGetPhysicalDeviceDisplayProperties2KHR', 'method': 'GetDisplayProperties'},
-                    {'name': 'vkGetPhysicalDeviceDisplayPlaneProperties2KHR', 'method': 'GetDisplayPlaneProperties'},
-                    {'name': 'vkGetDisplayPlaneCapabilities2KHR', 'method': 'GetDisplayPlaneCapabilities'},
-                    {'name': 'vkGetPhysicalDeviceToolProperties', 'method': 'GetPhysicalDeviceToolPropertiesEXT'},
-                    {'name': 'vkGetPhysicalDeviceFragmentShadingRatesKHR', 'method': 'GetFragmentShadingRates'},
-                    {'name': 'vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR', 'method': 'GetPhysicalDeviceCooperativeMatrixPropertiesKHR'},
-                    {'name': 'vkGetPhysicalDeviceSurfacePresentModesKHR', 'method': 'GetSurfacePresentModes'},
-                    {'name': 'vkGetPhysicalDeviceProperties', 'method': 'GetDeviceProperties'},
-                    {'name': 'vkEnumerateDeviceExtensionProperties', 'method': 'EnumerateExtensionProperties'},
-                ]
-            },
-        }
+            }
+        return result
     
-    def _get_file_mappings(self) -> Dict[str, Dict[str, any]]:
-        """Get explicit mapping of file names to function details with implementation metadata."""
-        return {
-            'buffer': 
-            [
-                'vkDestroyBuffer',
-				'vkBindBufferMemory',
-				'vkGetBufferMemoryRequirements',
-				'vkGetBufferMemoryRequirements2',
-				'vkGetBufferDeviceAddress',
-				'vkGetBufferOpaqueCaptureAddress'
-            ],
-            'buffer_view': 
-			[
-                'vkDestroyBufferView'
-            ],
-            'cmd_buffer': 
-            [
-                'vkBeginCommandBuffer',
-				'vkEndCommandBuffer',
-				'vkResetCommandBuffer',
-				'vkCmdBindPipeline',
-				'vkCmdBindDescriptorSets',
-				'vkCmdBindIndexBuffer',
-				'vkCmdBindIndexBuffer2',
-				'vkCmdBindDescriptorSets2',
-				'vkCmdPushConstants2',
-				'vkCmdPushDescriptorSet2',
-				'vkCmdPushDescriptorSetWithTemplate2',
-				'vkCmdSetDescriptorBufferOffsets2EXT',
-				'vkCmdBindDescriptorBufferEmbeddedSamplers2EXT',
-				'vkCmdBindVertexBuffers',
-				'vkCmdDraw',
-				'vkCmdDrawIndexed',
-				'vkCmdDrawIndirect',
-				'vkCmdDrawIndexedIndirect',
-				'vkCmdDrawIndirectCount',
-				'vkCmdDrawIndexedIndirectCount',
-				'vkCmdDrawMeshTasksEXT',
-				'vkCmdDrawMeshTasksIndirectEXT',
-				'vkCmdDrawMeshTasksIndirectCountEXT',
-				'vkCmdDispatch',
-				'vkCmdDispatchIndirect',
-				'vkCmdPreprocessGeneratedCommandsNV',
-				'vkCmdExecuteGeneratedCommandsNV',
-				'vkCmdBindPipelineShaderGroupNV',
-				'vkCmdUpdatePipelineIndirectBufferNV',
-				'vkCmdPreprocessGeneratedCommandsEXT',
-				'vkCmdExecuteGeneratedCommandsEXT',
-				'vkCmdCopyBuffer',
-				'vkCmdCopyImage',
-				'vkCmdBlitImage',
-				'vkCmdCopyBufferToImage',
-				'vkCmdCopyImageToBuffer',
-				'vkCmdUpdateBuffer',
-				'vkCmdFillBuffer',
-				'vkCmdClearColorImage',
-				'vkCmdClearDepthStencilImage',
-				'vkCmdClearAttachments',
-				'vkCmdResolveImage',
-				'vkCmdSetEvent',
-				'vkCmdResetEvent',
-				'vkCmdWaitEvents',
-				'vkCmdPipelineBarrier',
-				'vkCmdBeginQuery',
-				'vkCmdEndQuery',
-				'vkCmdResetQueryPool',
-				'vkCmdWriteTimestamp',
-				'vkCmdCopyQueryPoolResults',
-				'vkCmdPushConstants',
-				'vkCmdBeginRenderPass',
-				'vkCmdBeginRenderPass2',
-				'vkCmdNextSubpass',
-				'vkCmdNextSubpass2',
-				'vkCmdEndRenderPass',
-				'vkCmdEndRenderPass2',
-				'vkCmdExecuteCommands',
-				'vkFreeCommandBuffers',
-				'vkCmdDispatchBase',
-				'vkCmdSetDeviceMask',
-				'vkCmdSetViewport',
-				'vkCmdSetScissor',
-				'vkCmdSetLineWidth',
-				'vkCmdSetDepthBias',
-				'vkCmdSetBlendConstants',
-				'vkCmdSetDepthBounds',
-				'vkCmdSetStencilCompareMask',
-				'vkCmdSetStencilWriteMask',
-				'vkCmdSetStencilReference',
-				'vkCmdDebugMarkerBeginEXT',
-				'vkCmdDebugMarkerEndEXT',
-				'vkCmdDebugMarkerInsertEXT',
-				'vkCmdBeginDebugUtilsLabelEXT',
-				'vkCmdEndDebugUtilsLabelEXT',
-				'vkCmdInsertDebugUtilsLabelEXT',
-				'vkCmdSetSampleLocationsEXT',
-				'vkCmdWriteBufferMarkerAMD',
-				'vkCmdBindTransformFeedbackBuffersEXT',
-				'vkCmdBeginTransformFeedbackEXT',
-				'vkCmdEndTransformFeedbackEXT',
-				'vkCmdBeginQueryIndexedEXT',
-				'vkCmdEndQueryIndexedEXT',
-				'vkCmdDrawIndirectByteCountEXT',
-				'vkCmdBuildAccelerationStructuresKHR',
-				'vkCmdBuildAccelerationStructuresIndirectKHR',
-				'vkCmdTraceRaysKHR',
-				'vkCmdTraceRaysIndirectKHR',
-				'vkCmdCopyAccelerationStructureKHR',
-				'vkCmdWriteAccelerationStructuresPropertiesKHR',
-				'vkCmdCopyAccelerationStructureToMemoryKHR',
-				'vkCmdCopyMemoryToAccelerationStructureKHR',
-				'vkCmdSetRayTracingPipelineStackSizeKHR',
-				'vkCmdTraceRaysIndirect2KHR',
-				'vkCmdBuildMicromapsEXT',
-				'vkCmdCopyMemoryToMicromapEXT',
-				'vkCmdCopyMicromapEXT',
-				'vkCmdCopyMicromapToMemoryEXT',
-				'vkCmdWriteMicromapsPropertiesEXT',
-				'vkCmdSetLineStipple',
-				'vkCmdSetFragmentShadingRateKHR',
-				'vkCmdBeginConditionalRenderingEXT',
-				'vkCmdEndConditionalRenderingEXT',
-				'vkCmdSetEvent2',
-				'vkCmdResetEvent2',
-				'vkCmdWaitEvents2',
-				'vkCmdPipelineBarrier2',
-				'vkCmdWriteTimestamp2',
-				'vkCmdWriteBufferMarker2AMD',
-				'vkCmdBeginRendering',
-				'vkCmdEndRendering',
-				'vkCmdSetCullMode',
-				'vkCmdSetFrontFace',
-				'vkCmdSetPrimitiveTopology',
-				'vkCmdSetViewportWithCount',
-				'vkCmdSetScissorWithCount',
-				'vkCmdBindVertexBuffers2',
-				'vkCmdSetDepthTestEnable',
-				'vkCmdSetDepthWriteEnable',
-				'vkCmdSetDepthCompareOp',
-				'vkCmdSetDepthBoundsTestEnable',
-				'vkCmdSetStencilTestEnable',
-				'vkCmdSetStencilOp',
-				'vkCmdBindDescriptorBuffersEXT',
-				'vkCmdSetDescriptorBufferOffsetsEXT',
-				'vkCmdBindDescriptorBufferEmbeddedSamplersEXT',
-				'vkCmdSetColorWriteEnableEXT',
-				'vkCmdSetRasterizerDiscardEnable',
-				'vkCmdSetPrimitiveRestartEnable',
-				'vkCmdSetDepthBiasEnable',
-				'vkCmdSetLogicOpEXT',
-				'vkCmdSetPatchControlPointsEXT',
-				'vkCmdSetDepthClampRangeEXT',
-				'vkCmdBlitImage2',
-				'vkCmdCopyBuffer2',
-				'vkCmdCopyBufferToImage2',
-				'vkCmdCopyImage2',
-				'vkCmdCopyImageToBuffer2',
-				'vkCmdResolveImage2',
-				'vkCmdPushDescriptorSet',
-				'vkCmdPushDescriptorSetWithTemplate',
-				'vkCmdSetTessellationDomainOriginEXT',
-				'vkCmdSetDepthClampEnableEXT',
-				'vkCmdSetPolygonModeEXT',
-				'vkCmdSetRasterizationSamplesEXT',
-				'vkCmdSetSampleMaskEXT',
-				'vkCmdSetAlphaToCoverageEnableEXT',
-				'vkCmdSetAlphaToOneEnableEXT',
-				'vkCmdSetLogicOpEnableEXT',
-				'vkCmdSetColorBlendEnableEXT',
-				'vkCmdSetColorBlendEquationEXT',
-				'vkCmdSetColorWriteMaskEXT',
-				'vkCmdSetRasterizationStreamEXT',
-				'vkCmdSetConservativeRasterizationModeEXT',
-				'vkCmdSetExtraPrimitiveOverestimationSizeEXT',
-				'vkCmdSetDepthClipEnableEXT',
-				'vkCmdSetSampleLocationsEnableEXT',
-				'vkCmdSetColorBlendAdvancedEXT',
-				'vkCmdSetProvokingVertexModeEXT',
-				'vkCmdSetLineRasterizationModeEXT',
-				'vkCmdSetLineStippleEnableEXT',
-				'vkCmdSetDepthClipNegativeOneToOneEXT',
-				'vkCmdSetVertexInputEXT',
-				'vkCmdSetRenderingAttachmentLocations',
-				'vkCmdSetRenderingInputAttachmentIndices',
-				'vkCmdSetDepthBias2EXT'
-            ],
-            'cmd_pool': 
-            [
-                'vkDestroyCommandPool',
-				'vkResetCommandPool',
-				'vkTrimCommandPool'
-            ],
-            'debug_report': 
-            [
-                'vkCreateDebugReportCallbackEXT',
-				'vkDestroyDebugReportCallbackEXT',
-				'vkDebugReportMessageEXT'
-            ],
-            'debug_utils': 
-            [
-                'vkCreateDebugUtilsMessengerEXT',
-				'vkDestroyDebugUtilsMessengerEXT',
-				'vkSubmitDebugUtilsMessageEXT'
-            ],
-            'deferred_operation': 
-            [
-                'vkDestroyDeferredOperationKHR',
-				'vkGetDeferredOperationResultKHR',
-				'vkGetDeferredOperationMaxConcurrencyKHR',
-				'vkDeferredOperationJoinKHR'
-            ],
-            'descriptor_buffer': 
-            [
-                'vkGetDescriptorSetLayoutSizeEXT',
-				'vkGetDescriptorSetLayoutBindingOffsetEXT',
-				'vkGetDescriptorEXT',
-				'vkGetBufferOpaqueCaptureDescriptorDataEXT',
-				'vkGetImageOpaqueCaptureDescriptorDataEXT',
-				'vkGetImageViewOpaqueCaptureDescriptorDataEXT',
-				'vkGetSamplerOpaqueCaptureDescriptorDataEXT',
-				'vkGetAccelerationStructureOpaqueCaptureDescriptorDataEXT'
-            ],
-            'descriptor_pool': 
-            [
-                'vkCreateDescriptorPool',
-				'vkFreeDescriptorSets',
-				'vkResetDescriptorPool',
-				'vkDestroyDescriptorPool',
-				'vkAllocateDescriptorSets'
-            ],
-            'descriptor_set': 
-            [
-                'vkUpdateDescriptorSets'
-            ],
-            'descriptor_set_layout': 
-            [
-                'vkDestroyDescriptorSetLayout'
-            ],
-            'descriptor_update_template': 
-            [
-                'vkDestroyDescriptorUpdateTemplate', 'vkUpdateDescriptorSetWithTemplate'
-            ],
-            'device': 
-            [
-                'vkCreateFence', 'vkWaitForFences', 'vkResetFences', 'vkGetDeviceQueue', 'vkGetDeviceQueue2', 'vkCreateSemaphore', 'vkDestroyDevice', 'vkDeviceWaitIdle', 'vkCreateEvent', 'vkCreateQueryPool', 'vkCreateDescriptorSetLayout', 'vkCreatePipelineLayout', 'vkCreateFramebuffer', 'vkCreateRenderPass', 'vkCreateRenderPass2', 'vkCreateBuffer', 'vkCreateBufferView', 'vkCreateImage', 'vkCreateImageView', 'vkCreateShaderModule', 'vkCreatePipelineCache', 'vkCreateGraphicsPipelines', 'vkCreateComputePipelines', 'vkCreateSampler', 'vkCreateSamplerYcbcrConversion', 'vkCreateSwapchainKHR', 'vkGetRenderAreaGranularity', 'vkGetRenderingAreaGranularity', 'vkAllocateCommandBuffers', 'vkCreateCommandPool', 'vkAllocateMemory', 'vkImportSemaphoreFdKHR', 'vkBindBufferMemory2', 'vkBindImageMemory2', 'vkCreateDescriptorUpdateTemplate', 'vkGetDeviceGroupPeerMemoryFeatures', 'vkGetDeviceGroupPresentCapabilitiesKHR', 'vkGetDeviceGroupSurfacePresentModesKHR', 'vkDebugMarkerSetObjectTagEXT', 'vkDebugMarkerSetObjectNameEXT', 'vkSetDebugUtilsObjectTagEXT', 'vkSetDebugUtilsObjectNameEXT', 'vkSetGpaDeviceClockModeAMD', 'vkGetGpaDeviceClockInfoAMD', 'vkGetDescriptorSetLayoutSupport', 'vkGetCalibratedTimestampsEXT', 'vkGetSemaphoreCounterValue', 'vkWaitSemaphores', 'vkSignalSemaphore', 'vkGetMemoryHostPointerPropertiesEXT', 'vkCreateAccelerationStructureKHR', 'vkCreateRayTracingPipelinesKHR', 'vkBuildAccelerationStructuresKHR', 'vkCopyAccelerationStructureKHR', 'vkCopyAccelerationStructureToMemoryKHR', 'vkCopyMemoryToAccelerationStructureKHR', 'vkWriteAccelerationStructuresPropertiesKHR', 'vkGetRayTracingCaptureReplayShaderGroupHandlesKHR', 'vkGetDeviceAccelerationStructureCompatibilityKHR', 'vkGetAccelerationStructureBuildSizesKHR', 'vkCreateDeferredOperationKHR', 'vkGetMicromapBuildSizesEXT', 'vkCreateMicromapEXT', 'vkCopyMemoryToMicromapEXT', 'vkCopyMicromapToMemoryEXT', 'vkBuildMicromapsEXT', 'vkCopyMicromapEXT', 'vkDestroyMicromapEXT', 'vkWriteMicromapsPropertiesEXT', 'vkGetDeviceMicromapCompatibilityEXT', 'vkGetDeviceBufferMemoryRequirements', 'vkGetDeviceImageMemoryRequirements', 'vkGetDeviceImageSparseMemoryRequirements', 'vkSetDeviceMemoryPriorityEXT', 'vkGetDeviceFaultInfoEXT', 'vkCreatePipelineBinariesKHR', 'vkDestroyPipelineBinaryKHR', 'vkGetPipelineKeyKHR', 'vkGetPipelineBinaryDataKHR', 'vkReleaseCapturedPipelineDataKHR', 'vkGetDeviceImageSubresourceLayout', 'vkGetImageSubresourceLayout2', 'vkGetGeneratedCommandsMemoryRequirementsNV', 'vkCreateIndirectCommandsLayoutNV', 'vkDestroyIndirectCommandsLayoutNV', 'vkCreateIndirectCommandsLayoutEXT', 'vkCreateIndirectExecutionSetEXT', 'vkDestroyIndirectCommandsLayoutEXT', 'vkDestroyIndirectExecutionSetEXT', 'vkGetGeneratedCommandsMemoryRequirementsEXT', 'vkUpdateIndirectExecutionSetPipelineEXT', 'vkUpdateIndirectExecutionSetShaderEXT'
-            ],
-            'dispatch': 
-            [
-                'vkGetInstanceProcAddr', 'vkGetPhysicalDeviceProcAddr', 'vkGetDeviceProcAddr'
-            ],
-            'event': 
-            [
-                'vkDestroyEvent', 'vkGetEventStatus', 'vkSetEvent', 'vkResetEvent'
-            ],
-            'fence': 
-            [
-                'vkGetFenceStatus', 'vkDestroyFence', 'vkImportFenceFdKHR', 'vkGetFenceFdKHR'
-            ],
-            'framebuffer': 
-            [
-                'vkDestroyFramebuffer'
-            ],
-            'gpa_session': 
-            [
-                'vkCreateGpaSessionAMD', 'vkDestroyGpaSessionAMD', 'vkCmdBeginGpaSessionAMD', 'vkCmdEndGpaSessionAMD', 'vkCmdBeginGpaSampleAMD', 'vkCmdEndGpaSampleAMD', 'vkGetGpaSessionStatusAMD', 'vkGetGpaSessionResultsAMD', 'vkResetGpaSessionAMD', 'vkCmdCopyGpaSessionResultsAMD'
-            ],
-            'image': 
-            [
-                'vkDestroyImage', 'vkBindImageMemory', 'vkGetImageMemoryRequirements', 'vkGetImageSparseMemoryRequirements', 'vkGetImageSubresourceLayout', 'vkGetImageMemoryRequirements2', 'vkGetImageSparseMemoryRequirements2', 'vkGetImageDrmFormatModifierPropertiesEXT', 'vkCopyImageToImage', 'vkCopyImageToMemory', 'vkCopyMemoryToImage', 'vkTransitionImageLayout'
-            ],
-            'image_view': 
-            [
-                'vkDestroyImageView'
-            ],
-            'instance': 
-            [
-                'vkEnumerateInstanceVersion', 'vkCreateInstance', 'vkDestroyInstance', 'vkEnumeratePhysicalDevices', 'vkEnumeratePhysicalDeviceGroups', 'vkEnumerateInstanceExtensionProperties', 'vkEnumerateInstanceLayerProperties'
-            ],
-            'memory': 
-            [
-                'vkFreeMemory', 'vkMapMemory', 'vkUnmapMemory', 'vkMapMemory2', 'vkUnmapMemory2', 'vkFlushMappedMemoryRanges', 'vkInvalidateMappedMemoryRanges', 'vkGetDeviceMemoryCommitment', 'vkGetMemoryFdKHR', 'vkGetMemoryFdPropertiesKHR', 'vkGetDeviceMemoryOpaqueCaptureAddress'
-            ],
-            'physical_device': 
-            [
-                'vkCreateDevice', 'vkEnumerateDeviceExtensionProperties', 'vkGetPhysicalDeviceFeatures', 'vkGetPhysicalDeviceProperties', 'vkGetPhysicalDeviceImageFormatProperties', 'vkGetPhysicalDeviceFormatProperties', 'vkEnumerateDeviceLayerProperties', 'vkGetPhysicalDeviceMemoryProperties', 'vkGetPhysicalDeviceQueueFamilyProperties', 'vkGetPhysicalDeviceSparseImageFormatProperties', 'vkGetPhysicalDeviceSurfaceSupportKHR', 'vkGetPhysicalDeviceSurfacePresentModesKHR', 'vkGetPhysicalDeviceSurfaceCapabilitiesKHR', 'vkGetPhysicalDeviceSurfaceCapabilities2KHR', 'vkGetPhysicalDeviceSurfaceFormatsKHR', 'vkGetPhysicalDeviceSurfaceFormats2KHR', 'vkGetPhysicalDeviceFeatures2', 'vkGetPhysicalDeviceProperties2', 'vkGetPhysicalDeviceFormatProperties2', 'vkGetPhysicalDeviceImageFormatProperties2', 'vkGetPhysicalDeviceMultisamplePropertiesEXT', 'vkGetPhysicalDeviceQueueFamilyProperties2', 'vkGetPhysicalDeviceMemoryProperties2', 'vkGetPhysicalDeviceSparseImageFormatProperties2', 'vkGetPhysicalDeviceExternalBufferProperties', 'vkGetPhysicalDeviceExternalSemaphoreProperties', 'vkGetPhysicalDeviceExternalFenceProperties', 'vkGetPhysicalDeviceXcbPresentationSupportKHR', 'vkGetPhysicalDeviceXlibPresentationSupportKHR', 'vkGetPhysicalDeviceWaylandPresentationSupportKHR', 'vkAcquireXlibDisplayEXT', 'vkGetRandROutputDisplayEXT', 'vkReleaseDisplayEXT', 'vkGetPhysicalDevicePresentRectanglesKHR', 'vkGetPhysicalDeviceDisplayPropertiesKHR', 'vkGetPhysicalDeviceDisplayPlanePropertiesKHR', 'vkGetDisplayPlaneSupportedDisplaysKHR', 'vkGetDisplayModePropertiesKHR', 'vkCreateDisplayModeKHR', 'vkGetDisplayPlaneCapabilitiesKHR', 'vkGetPhysicalDeviceDisplayProperties2KHR', 'vkGetPhysicalDeviceDisplayPlaneProperties2KHR', 'vkGetDisplayModeProperties2KHR', 'vkGetDisplayPlaneCapabilities2KHR', 'vkGetPhysicalDeviceSurfaceCapabilities2EXT', 'vkGetPhysicalDeviceCalibrateableTimeDomainsEXT', 'vkGetPhysicalDeviceToolProperties', 'vkGetPhysicalDeviceFragmentShadingRatesKHR', 'vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR'
-            ],
-            'pipeline': 
-            [
-                'vkDestroyPipeline', 'vkGetShaderInfoAMD', 'vkGetPipelineExecutablePropertiesKHR', 'vkGetPipelineExecutableStatisticsKHR', 'vkGetPipelineExecutableInternalRepresentationsKHR', 'vkGetPipelineIndirectDeviceAddressNV', 'vkGetPipelineIndirectMemoryRequirementsNV'
-            ],
-            'pipeline_cache': 
-            [
-                'vkDestroyPipelineCache', 'vkGetPipelineCacheData', 'vkMergePipelineCaches'
-            ],
-            'pipeline_layout': 
-            [
-                'vkDestroyPipelineLayout'
-            ],
-            'private_data_slot': 
-            [
-                'vkCreatePrivateDataSlot', 'vkDestroyPrivateDataSlot', 'vkSetPrivateData', 'vkGetPrivateData'
-            ],
-            'query': 
-            [
-                'vkGetQueryPoolResults', 'vkDestroyQueryPool', 'vkResetQueryPool'
-            ],
-            'queue': 
-            [
-                'vkQueueSubmit', 'vkQueueSubmit2', 'vkQueueWaitIdle', 'vkQueueBindSparse', 'vkQueuePresentKHR', 'vkQueueBeginDebugUtilsLabelEXT', 'vkQueueEndDebugUtilsLabelEXT', 'vkQueueInsertDebugUtilsLabelEXT'
-            ],
-            'render_pass': 
-            [
-                'vkDestroyRenderPass'
-            ],
-            'sampler': 
-            [
-                'vkDestroySampler'
-            ],
-            'sampler_ycbcr_conversion': 
-            [
-                'vkDestroySamplerYcbcrConversion'
-            ],
-            'semaphore': 
-            [
-                'vkDestroySemaphore', 'vkGetSemaphoreFdKHR'
-            ],
-            'shader': 
-            [
-                'vkDestroyShaderModule', 'vkGetShaderModuleIdentifierEXT', 'vkGetShaderModuleCreateInfoIdentifierEXT'
-            ],
-            'surface': 
-            [
-                'vkCreateXcbSurfaceKHR', 'vkCreateXlibSurfaceKHR', 'vkCreateWaylandSurfaceKHR', 'vkCreateDisplayPlaneSurfaceKHR', 'vkDestroySurfaceKHR'
-            ],
-            'swapchain': 
-            [
-                'vkDestroySwapchainKHR', 'vkGetSwapchainImagesKHR', 'vkAcquireNextImageKHR', 'vkAcquireNextImage2KHR', 'vkSetHdrMetadataEXT'
-            ],
+    def _get_file_mappings(self) -> Dict[str, List[str]]:
+        """Get explicit mapping of file names to function details with implementation metadata."""  
+        return self.config.file_mappings
+    
+    def _find_handle_parameter_for_object_type(self, command: Command, file_object_type: str) -> Optional:
+        """Find the handle parameter that matches the expected object type for this file.
+        
+        Args:
+            command: The Vulkan command to analyze
+            file_object_type: The object type expected for this file (e.g., 'memory', 'buffer')
+            
+        Returns:
+            The parameter that matches the expected handle type, or None if not found
+        """
+        from xml_parser import Parameter
+        
+        # Get expected VkHandle type for this file's object type
+        expected_type = self.config.get_expected_handle_type(file_object_type)
+        if not expected_type:
+            return None
+        
+        # First, look for direct handle parameters of the expected type
+        for param in command.parameters:
+            if param.type_name == expected_type and not param.is_pointer:
+                return param
+        
+        # Check for embedded handles in struct parameters using config-based patterns
+        struct_patterns = {
+            'memory': ['VkMemoryMapInfo', 'VkMemoryUnmapInfo', 'VkMemoryGetFdInfoKHR', 'VkDeviceMemoryOpaqueCaptureAddressInfo'],
+            'image': ['VkImageMemoryRequirementsInfo2', 'VkImageSparseMemoryRequirementsInfo2'],
+            'buffer': ['VkBufferMemoryRequirementsInfo2', 'VkBufferDeviceAddressInfo'],
         }
+        
+        struct_types = struct_patterns.get(file_object_type, [])
+        for param in command.parameters:
+            if param.type_name in struct_types and param.is_pointer:
+                # Create a synthetic parameter representing the embedded handle
+                # This is a bit of a hack, but it allows us to identify these cases
+                synthetic_param = Parameter(
+                    name=f"_embedded_{file_object_type}",  # e.g., "_embedded_memory"
+                    type_name=expected_type,
+                    is_pointer=False
+                )
+                return synthetic_param
+                
+        return None
     
     def _get_object_type_from_command(self, command: Command) -> str:
         """Determine object type from command based on function name patterns."""
@@ -891,67 +459,6 @@ class EntryPointGenerator:
             }
         
         return context
-    
-    def _find_handle_parameter_for_object_type(self, command: Command, file_object_type: str) -> Optional:
-        """Find the parameter that matches the file's object type."""
-        # Convert file object type to expected Vulkan handle type
-        # e.g., "memory" -> "VkDeviceMemory", "image" -> "VkImage", "buffer" -> "VkBuffer"
-        expected_vk_types = {
-            'memory': 'VkDeviceMemory',
-            'image': 'VkImage', 
-            'buffer': 'VkBuffer',
-            'cmd_pool': 'VkCommandPool',
-            'cmd_buffer': 'VkCommandBuffer',
-            'fence': 'VkFence',
-            'semaphore': 'VkSemaphore',
-            'event': 'VkEvent',
-            'query': 'VkQueryPool',
-            'pipeline': 'VkPipeline',
-            'pipeline_cache': 'VkPipelineCache',
-            'pipeline_layout': 'VkPipelineLayout',
-            'render_pass': 'VkRenderPass',
-            'framebuffer': 'VkFramebuffer',
-            'sampler': 'VkSampler',
-            'descriptor_set_layout': 'VkDescriptorSetLayout',
-            'descriptor_pool': 'VkDescriptorPool',
-            'descriptor_set': 'VkDescriptorSet',
-            'shader': 'VkShaderModule',
-            'surface': 'VkSurfaceKHR',
-            'swapchain': 'VkSwapchainKHR',
-            'deferred_operation': 'VkDeferredOperationKHR',
-        }
-        
-        expected_type = expected_vk_types.get(file_object_type)
-        if not expected_type:
-            return None
-            
-        # Find parameter with matching type
-        for param in command.parameters:
-            if param.type_name == expected_type:
-                return param
-        
-        # If not found, check for common struct patterns that contain the handle
-        # e.g., VkMemoryMapInfo contains VkDeviceMemory, VkImageMemoryRequirementsInfo2 contains VkImage
-        struct_patterns = {
-            'memory': ['VkMemoryMapInfo', 'VkMemoryUnmapInfo', 'VkMemoryGetFdInfoKHR', 'VkDeviceMemoryOpaqueCaptureAddressInfo'],
-            'image': ['VkImageMemoryRequirementsInfo2', 'VkImageSparseMemoryRequirementsInfo2'],
-            'buffer': ['VkBufferMemoryRequirementsInfo2', 'VkBufferDeviceAddressInfo'],
-        }
-        
-        struct_types = struct_patterns.get(file_object_type, [])
-        for param in command.parameters:
-            if param.type_name in struct_types and param.is_pointer:
-                # Create a synthetic parameter representing the embedded handle
-                # This is a bit of a hack, but it allows us to identify these cases
-                from xml_parser import Parameter
-                synthetic_param = Parameter(
-                    name=f"_embedded_{file_object_type}",  # e.g., "_embedded_memory"
-                    type_name=expected_type,
-                    is_pointer=False
-                )
-                return synthetic_param
-                
-        return None
     
     def _format_method_parameters_excluding_param(self, parameters, exclude_param_name: Optional[str]) -> str:
         """Format method parameters, excluding a specific parameter by name and converting device to pDevice."""
