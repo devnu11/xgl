@@ -11,6 +11,7 @@ class TypeMapper:
     HANDLE_MAPPINGS: Dict[str, str] = {
         'VkCommandBuffer': 'CmdBuffer',
         'VkCommandPool': 'CmdPool',
+        'VkDeviceMemory': 'Memory',
         'VkSurfaceKHR': 'Surface'
     }
     

@@ -85,10 +85,10 @@ $allocator_logic
     return pObject->$method_name($method_params);""")
 
     DIRECT_FUNCTION_BODY = CodeTemplate("""
-    return $api_prefix$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
+    ${device_init_line}return $api_prefix$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
 
     VOID_FUNCTION_BODY = CodeTemplate("""
-    $api_prefix$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
+    ${device_init_line}$api_prefix$object_type::ObjectFromHandle($handle_param)->$method_name($method_params);""")
     
     GLOBAL_FUNCTION_BODY = CodeTemplate("""
     return $method_name($method_params);""")
@@ -205,7 +205,6 @@ class TemplateEngine:
             # Add return statement with space for non-void functions, empty for void
             context['return_statement'] = '' if context.get('return_type') == 'void' else 'return '
             return self.repo.STATIC_MEMBER_CALL_BODY.render(**context)
-        
         elif impl_type == 'inline':
             # For simple implementations, we might have inline code or use existing simple logic
             if context.get('inline_implementation'):

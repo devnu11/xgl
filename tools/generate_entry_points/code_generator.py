@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from xml_parser import VulkanRegistryParser, Command, CommandType
 from template_engine import TemplateEngine
@@ -278,18 +278,43 @@ class EntryPointGenerator:
                     {'name': 'vkEnumerateInstanceExtensionProperties', 'impl': 'static_member_call', 'method': 'EnumerateExtensionProperties'}
                 ]
             },
-            'memory': {
-                'functions': [
-                    {'name': 'vkFlushMappedMemoryRanges', 'impl': 'success_only', 'return': 'VK_SUCCESS'}, # All of our host visible memory heaps are coherent
-                    {'name': 'vkInvalidateMappedMemoryRanges', 'impl': 'success_only', 'return': 'VK_SUCCESS'}, # All of our host visible memory heaps are coherent
-                ]
-            },
             'physical_device': {
                 'functions': [
                     {'name': 'vkEnumerateDeviceLayerProperties', 'impl': 'success_only', 'return': 'VK_SUCCESS'},
                 ]
             },
-
+            'memory': {
+                'functions': [
+                    {'name': 'vkFlushMappedMemoryRanges', 'impl': 'success_only', 'return': 'VK_SUCCESS'}, # All of our host visible memory heaps are coherent
+                    {'name': 'vkInvalidateMappedMemoryRanges', 'impl': 'success_only', 'return': 'VK_SUCCESS'}, # All of our host visible memory heaps are coherent
+                    #{'name': 'vkUnmapMemory2', 'impl': 'method', 'method': 'Unmap', 'return': 'VK_SUCCESS'},
+                    {'name': 'vkGetDeviceMemoryCommitment', 'method': 'GetCommitment'}
+                ]
+            },
+            'physical_device': {
+                'functions': [
+                    {'name': 'vkGetPhysicalDeviceProperties2', 'method': 'GetDeviceProperties2'},
+                    {'name': 'vkGetPhysicalDeviceMultisamplePropertiesEXT', 'method': 'GetDeviceMultisampleProperties'},
+                    {'name': 'vkGetPhysicalDeviceQueueFamilyProperties2', 'method': 'GetQueueFamilyProperties'},
+                    {'name': 'vkAcquireXlibDisplayEXT', 'method': 'AcquireXlibDisplay'},
+                    {'name': 'vkGetRandROutputDisplayEXT', 'method': 'GetRandROutputDisplay'},
+                    {'name': 'vkReleaseDisplayEXT', 'method': 'ReleaseDisplay'},
+                    {'name': 'vkGetPhysicalDevicePresentRectanglesKHR', 'method': 'GetPhysicalDevicePresentRectangles'},
+                    {'name': 'vkGetDisplayPlaneSupportedDisplaysKHR', 'method': 'GetDisplayPlaneSupportedDisplays'},
+                    {'name': 'vkGetDisplayModePropertiesKHR', 'method': 'GetDisplayModeProperties'},
+                    {'name': 'vkCreateDisplayModeKHR', 'method': 'CreateDisplayMode'},
+                    {'name': 'vkGetDisplayPlaneCapabilitiesKHR', 'method': 'GetDisplayPlaneCapabilities'},
+                    {'name': 'vkGetPhysicalDeviceDisplayProperties2KHR', 'method': 'GetDisplayProperties'},
+                    {'name': 'vkGetPhysicalDeviceDisplayPlaneProperties2KHR', 'method': 'GetDisplayPlaneProperties'},
+                    {'name': 'vkGetDisplayPlaneCapabilities2KHR', 'method': 'GetDisplayPlaneCapabilities'},
+                    {'name': 'vkGetPhysicalDeviceToolProperties', 'method': 'GetPhysicalDeviceToolPropertiesEXT'},
+                    {'name': 'vkGetPhysicalDeviceFragmentShadingRatesKHR', 'method': 'GetFragmentShadingRates'},
+                    {'name': 'vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR', 'method': 'GetPhysicalDeviceCooperativeMatrixPropertiesKHR'},
+                    {'name': 'vkGetPhysicalDeviceSurfacePresentModesKHR', 'method': 'GetSurfacePresentModes'},
+                    {'name': 'vkGetPhysicalDeviceProperties', 'method': 'GetDeviceProperties'},
+                    {'name': 'vkEnumerateDeviceExtensionProperties', 'method': 'EnumerateExtensionProperties'},
+                ]
+            },
         }
     
     def _get_file_mappings(self) -> Dict[str, Dict[str, any]]:
@@ -708,7 +733,7 @@ class EntryPointGenerator:
         self._log_info(f"Generating {filename} with {len(commands)} functions")
         
         includes = self._generate_includes(commands)
-        functions = self._generate_functions(commands)
+        functions = self._generate_functions(commands, object_type)
         
         content = self.template_engine.render_file_header(
             filename=filename,
@@ -725,22 +750,22 @@ class EntryPointGenerator:
         """Generate include statements for commands."""
         return self.type_mapper.get_required_includes(commands)
     
-    def _generate_functions(self, commands: List[Command]) -> str:
+    def _generate_functions(self, commands: List[Command], file_object_type: str) -> str:
         """Generate all functions for given commands."""
         functions = []
         
         for command in commands:
-            function_code = self._generate_single_function(command)
+            function_code = self._generate_single_function(command, file_object_type)
             functions.append(function_code)
         
         return '\n\n'.join(functions)
     
-    def _generate_single_function(self, command: Command) -> str:
+    def _generate_single_function(self, command: Command, file_object_type: str) -> str:
         """Generate code for a single entry point function."""
-        context = self._build_function_context(command)
+        context = self._build_function_context(command, file_object_type)
         return self.template_engine.render_entry_function(context)
     
-    def _build_function_context(self, command: Command) -> Dict[str, str]:
+    def _build_function_context(self, command: Command, file_object_type: str) -> Dict[str, str]:
         """Build template context for function generation."""
         first_handle = command.get_first_handle_param()
         
@@ -749,57 +774,84 @@ class EntryPointGenerator:
         impl_method = getattr(command, 'impl_method', None)
         impl_return = getattr(command, 'impl_return', None)
         
-        # Use impl_method if specified, otherwise fall back to type mapper with target class context
+        # Convert file_object_type from snake_case to PascalCase for XGL class name
+        # e.g., "cmd_pool" -> "CmdPool", "memory" -> "Memory", "device" -> "Device"
+        file_class_name = ''.join(word.capitalize() for word in file_object_type.split('_'))
+        
+        # Use impl_method if specified, otherwise fall back to type mapper with file's class context
         if impl_method:
             method_name = impl_method
         else:
-            target_class = self.type_mapper.get_xgl_type(first_handle.type_name) if first_handle else None
-            method_name = self.type_mapper.get_method_name(command.name, target_class)
+            method_name = self.type_mapper.get_method_name(command.name, file_class_name)
         
         # Build basic context
-        # For global functions (no handle), don't skip first parameter
-        skip_first_param = first_handle is not None
+        # Determine which parameter to exclude from method parameters
+        target_handle = self._find_handle_parameter_for_object_type(command, file_object_type)
+        if target_handle and not target_handle.name.startswith('_embedded_'):
+            # Skip the target handle parameter specifically (but not synthetic embedded ones)
+            skip_param_name = target_handle.name
+        elif target_handle and target_handle.name.startswith('_embedded_'):
+            # For embedded handles, don't skip any parameter - the handle is inside a struct
+            skip_param_name = None
+        else:
+            # Fallback: skip first parameter if it's a handle
+            skip_param_name = first_handle.name if first_handle else None
+        
+        # Check if function has a device parameter that will need initialization
+        has_device_param = any(param.type_name == 'VkDevice' and param.name == 'device' for param in command.parameters)
         
         context = {
             'function_name': command.name,
             'return_type': command.return_type,
             'parameters': self.type_mapper.format_parameter_list(command.parameters),
             'method_name': method_name,
-            'method_params': self.type_mapper.format_method_parameters(command.parameters, skip_first=skip_first_param),
+            'method_params': self._format_method_parameters_excluding_param(command.parameters, skip_param_name),
             # For entry_points pattern, include all parameters (don't skip first)
             'entry_points_params': self.type_mapper.format_method_parameters(command.parameters, skip_first=False),
             # Add implementation metadata from enhanced mappings
             'impl_type': impl_type,
             'impl_method': impl_method,
-            'impl_return': impl_return
+            'impl_return': impl_return,
+            # Include raw command parameters for special processing
+            '_command_params': command.parameters,
+            # Store the target handle for templates
+            '_target_handle_param': target_handle.name if target_handle else (first_handle.name if first_handle else None),
+            # Device initialization logic
+            'needs_device_init': has_device_param and target_handle is not None,
+            'device_init_line': 'const Device* pDevice = ApiDevice::ObjectFromHandle(device);\n    ' if has_device_param and target_handle is not None else ''
         }
         
         # Add destroy function specific context
         is_destroy_function = command.name.startswith('vkDestroy') and len(command.parameters) >= 2
         if is_destroy_function:
-            context.update(self._build_destroy_context(command))
+            context.update(self._build_destroy_context(command, file_class_name))
         
         # Add function body (skip handle context for destroy functions as destroy context is more specific)
         if first_handle and not is_destroy_function:
-            context.update(self._build_handle_context(command, first_handle))
+            # Find the handle parameter that matches the file's object type, fallback to first handle
+            target_handle = self._find_handle_parameter_for_object_type(command, file_object_type)
+            if target_handle:
+                context.update(self._build_handle_context(command, target_handle, file_class_name, file_object_type))
+            else:
+                # Fallback to first handle - if it's a device handle, use Device as object type
+                if first_handle.type_name == 'VkDevice':
+                    context.update(self._build_handle_context(command, first_handle, 'Device', 'device'))
+                else:
+                    context.update(self._build_handle_context(command, first_handle, file_class_name, file_object_type))
         
         # For static member calls, we need the object_type even for global functions
         if impl_type == 'static_member_call':
-            # For static calls, determine the class name from the function name or explicit mapping
-            if command.name.startswith('vkCreateInstance') or command.name.startswith('vkEnumerateInstance'):
-                context['object_type'] = 'Instance'
-            elif first_handle:
-                context['object_type'] = self.type_mapper.get_xgl_type(first_handle.type_name)
-            else:
-                context['object_type'] = 'Instance'  # Default for global instance functions
+            # Use the file's class name for static calls
+            context['object_type'] = file_class_name
         
         # Add allocator logic for functions with allocator parameters (but not destroy functions or global functions)
         if not is_destroy_function and first_handle:
             allocator_param = self._find_allocator_parameter(command)
             if allocator_param:
                 context['allocator_logic'] = self.template_engine.render_allocator_logic(allocator_param.name)
-                # Replace allocator parameter with pAllocCB in method parameters
-                context['method_params'] = self._format_method_parameters_with_allocator(command.parameters, allocator_param.name, skip_first=skip_first_param)
+                # Replace allocator parameter with pAllocCB in method parameters, also excluding the target handle
+                context['method_params'] = self._format_method_parameters_with_allocator_excluding_handle(
+                    command.parameters, allocator_param.name, skip_param_name)
             else:
                 context['allocator_logic'] = ''
         elif not is_destroy_function:
@@ -811,7 +863,7 @@ class EntryPointGenerator:
         
         return context
     
-    def _build_destroy_context(self, command: Command) -> Dict[str, str]:
+    def _build_destroy_context(self, command: Command, file_class_name: str) -> Dict[str, str]:
         """Build context for destroy functions."""
         if len(command.parameters) == 2:
             # 2-parameter destroy functions: (handle, allocator) - handle destroys itself
@@ -823,7 +875,7 @@ class EntryPointGenerator:
                 'device_param': handle_param.name,  # Use the handle as device param for these functions
                 'handle_param': handle_param.name,
                 'allocator_param': allocator_param.name,
-                'object_type': self.type_mapper.get_xgl_type(handle_param.type_name)
+                'object_type': file_class_name
             }
         else:
             # 3-parameter destroy functions: (device, handle, allocator)
@@ -835,10 +887,120 @@ class EntryPointGenerator:
                 'device_param': device_param.name,
                 'handle_param': handle_param.name,
                 'allocator_param': allocator_param.name,
-                'object_type': self.type_mapper.get_xgl_type(handle_param.type_name)
+                'object_type': file_class_name
             }
         
         return context
+    
+    def _find_handle_parameter_for_object_type(self, command: Command, file_object_type: str) -> Optional:
+        """Find the parameter that matches the file's object type."""
+        # Convert file object type to expected Vulkan handle type
+        # e.g., "memory" -> "VkDeviceMemory", "image" -> "VkImage", "buffer" -> "VkBuffer"
+        expected_vk_types = {
+            'memory': 'VkDeviceMemory',
+            'image': 'VkImage', 
+            'buffer': 'VkBuffer',
+            'cmd_pool': 'VkCommandPool',
+            'cmd_buffer': 'VkCommandBuffer',
+            'fence': 'VkFence',
+            'semaphore': 'VkSemaphore',
+            'event': 'VkEvent',
+            'query': 'VkQueryPool',
+            'pipeline': 'VkPipeline',
+            'pipeline_cache': 'VkPipelineCache',
+            'pipeline_layout': 'VkPipelineLayout',
+            'render_pass': 'VkRenderPass',
+            'framebuffer': 'VkFramebuffer',
+            'sampler': 'VkSampler',
+            'descriptor_set_layout': 'VkDescriptorSetLayout',
+            'descriptor_pool': 'VkDescriptorPool',
+            'descriptor_set': 'VkDescriptorSet',
+            'shader': 'VkShaderModule',
+            'surface': 'VkSurfaceKHR',
+            'swapchain': 'VkSwapchainKHR',
+            'deferred_operation': 'VkDeferredOperationKHR',
+        }
+        
+        expected_type = expected_vk_types.get(file_object_type)
+        if not expected_type:
+            return None
+            
+        # Find parameter with matching type
+        for param in command.parameters:
+            if param.type_name == expected_type:
+                return param
+        
+        # If not found, check for common struct patterns that contain the handle
+        # e.g., VkMemoryMapInfo contains VkDeviceMemory, VkImageMemoryRequirementsInfo2 contains VkImage
+        struct_patterns = {
+            'memory': ['VkMemoryMapInfo', 'VkMemoryUnmapInfo', 'VkMemoryGetFdInfoKHR', 'VkDeviceMemoryOpaqueCaptureAddressInfo'],
+            'image': ['VkImageMemoryRequirementsInfo2', 'VkImageSparseMemoryRequirementsInfo2'],
+            'buffer': ['VkBufferMemoryRequirementsInfo2', 'VkBufferDeviceAddressInfo'],
+        }
+        
+        struct_types = struct_patterns.get(file_object_type, [])
+        for param in command.parameters:
+            if param.type_name in struct_types and param.is_pointer:
+                # Create a synthetic parameter representing the embedded handle
+                # This is a bit of a hack, but it allows us to identify these cases
+                from xml_parser import Parameter
+                synthetic_param = Parameter(
+                    name=f"_embedded_{file_object_type}",  # e.g., "_embedded_memory"
+                    type_name=expected_type,
+                    is_pointer=False
+                )
+                return synthetic_param
+                
+        return None
+    
+    def _format_method_parameters_excluding_param(self, parameters, exclude_param_name: Optional[str]) -> str:
+        """Format method parameters, excluding a specific parameter by name and converting device to pDevice."""
+        if not exclude_param_name:
+            # No parameter to exclude, format all parameters with device conversion
+            return self._format_method_parameters_with_device_conversion(parameters)
+        
+        # Filter out the excluded parameter
+        filtered_params = [param for param in parameters if param.name != exclude_param_name]
+        return self._format_method_parameters_with_device_conversion(filtered_params)
+    
+    def _format_method_parameters_with_device_conversion(self, parameters) -> str:
+        """Format method parameters, converting VkDevice parameters to pDevice."""
+        param_names = []
+        for param in parameters:
+            if param.type_name == 'VkDevice' and param.name == 'device':
+                param_names.append('pDevice')
+            else:
+                param_names.append(param.name)
+        
+        # Apply formatting similar to the original format_method_parameters
+        if len(param_names) >= 3 or len(", ".join(param_names)) > 80:  # Leave room for method call syntax
+            return "\n" + " " * 8 + (",\n" + " " * 8).join(param_names)
+        else:
+            return ", ".join(param_names)
+    
+    def _format_method_parameters_with_allocator_excluding_handle(self, parameters, allocator_param_name: str, exclude_param_name: Optional[str]) -> str:
+        """Format method parameters, replacing allocator with pAllocCB, excluding a specific parameter, and converting device to pDevice."""
+        # Filter out the excluded parameter first
+        if exclude_param_name:
+            filtered_params = [param for param in parameters if param.name != exclude_param_name]
+        else:
+            filtered_params = list(parameters)
+        
+        # Now apply allocator replacement and device conversion logic
+        param_names = []
+        for param in filtered_params:
+            if param.name == allocator_param_name:
+                param_names.append('pAllocCB')
+            elif param.type_name == 'VkDevice' and param.name == 'device':
+                param_names.append('pDevice')
+            else:
+                param_names.append(param.name)
+        
+        # Apply formatting similar to the original _format_method_parameters_with_allocator
+        if len(param_names) >= 3 or len(", ".join(param_names)) > 80:  # Leave room for method call syntax
+            return "\n" + " " * 8 + (",\n" + " " * 8).join(param_names)
+        else:
+            return ", ".join(param_names)
     
     def _find_allocator_parameter(self, command: Command):
         """Find the allocator callback parameter in a command."""
@@ -864,17 +1026,64 @@ class EntryPointGenerator:
         else:
             return ", ".join(param_names)
     
-    def _build_handle_context(self, command: Command, handle_param) -> Dict[str, str]:
+    def _build_handle_context(self, command: Command, handle_param, file_class_name: str, file_object_type: str) -> Dict[str, str]:
         """Build context for handle-based functions."""
+        
+        # Handle embedded parameters - extract the actual parameter name to use
+        if handle_param.name.startswith('_embedded_'):
+            # For embedded handles, we need to determine how to extract the handle from the struct
+            # For common patterns, we can make reasonable assumptions about access
+            embedded_mappings = {
+                'memory': {
+                    'VkMemoryMapInfo': 'pMemoryMapInfo->memory',
+                    'VkMemoryUnmapInfo': 'pMemoryUnmapInfo->memory',
+                    'VkMemoryGetFdInfoKHR': 'pGetFdInfo->memory',
+                    'VkDeviceMemoryOpaqueCaptureAddressInfo': 'pInfo->memory'
+                },
+                'image': {
+                    'VkImageMemoryRequirementsInfo2': 'pInfo->image',
+                    'VkImageSparseMemoryRequirementsInfo2': 'pInfo->image'
+                },
+                'buffer': {
+                    'VkBufferMemoryRequirementsInfo2': 'pInfo->buffer',
+                    'VkBufferDeviceAddressInfo': 'pInfo->buffer'
+                }
+            }
+            
+            # Find the struct parameter that contains the embedded handle
+            struct_patterns = {
+                'memory': ['VkMemoryMapInfo', 'VkMemoryUnmapInfo', 'VkMemoryGetFdInfoKHR', 'VkDeviceMemoryOpaqueCaptureAddressInfo'],
+                'image': ['VkImageMemoryRequirementsInfo2', 'VkImageSparseMemoryRequirementsInfo2'],
+                'buffer': ['VkBufferMemoryRequirementsInfo2', 'VkBufferDeviceAddressInfo'],
+            }
+            
+            struct_types = struct_patterns.get(file_object_type, [])
+            for param in command.parameters:
+                if param.type_name in struct_types and param.is_pointer:
+                    # Get the access pattern for this struct type
+                    access_pattern = embedded_mappings.get(file_object_type, {}).get(param.type_name)
+                    if access_pattern:
+                        handle_param_name = access_pattern
+                    else:
+                        # Fallback: assume the struct has a field with the expected name
+                        expected_field = file_object_type  # e.g., 'memory', 'image', 'buffer'
+                        handle_param_name = f"{param.name}->{expected_field}"
+                    break
+            else:
+                # Couldn't find the struct parameter, fallback to a generic name
+                handle_param_name = f"embedded_{file_object_type}"
+        else:
+            handle_param_name = handle_param.name
+        
         context = {
-            'handle_param': handle_param.name,
-            'object_type': self.type_mapper.get_xgl_type(handle_param.type_name)
+            'handle_param': handle_param_name,
+            'object_type': file_class_name
         }
         
-        # Determine function type for body template selection
-        if handle_param.type_name == 'VkDevice':
+        # Determine function type for body template selection based on file's object type
+        if file_class_name == 'Device':
             context['function_type'] = 'device'
-        elif handle_param.type_name == 'VkInstance':
+        elif file_class_name == 'Instance':
             context['function_type'] = 'instance'
         else:
             context['function_type'] = 'simple'
