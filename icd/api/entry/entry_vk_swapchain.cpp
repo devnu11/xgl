@@ -42,7 +42,7 @@ VKAPI_ATTR void VKAPI_CALL vkDestroySwapchainKHR(
 {
     if (swapchain != VK_NULL_HANDLE)
     {
-        const Device*                pDevice  = ApiDevice::ObjectFromHandle(device);
+        Device*                      pDevice  = ApiDevice::ObjectFromHandle(device);
         const VkAllocationCallbacks* pAllocCB = pAllocator ? pAllocator : pDevice->VkInstance()->GetAllocCallbacks();
 
         SwapChain::ObjectFromHandle(swapchain)->Destroy(pAllocCB);

@@ -71,7 +71,14 @@ VKAPI_ATTR VkResult VKAPI_CALL vkBindImageMemory(
 {
     Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return Image::ObjectFromHandle(image)->BindMemory(pDevice, memory, memoryOffset, 0, nullptr, 0, nullptr);
+    return Image::ObjectFromHandle(image)->BindMemory(
+		pDevice,
+		memory,
+		memoryOffset,
+		0,
+		nullptr,
+		0,
+		nullptr);
 }
 
 // =====================================================================================================================

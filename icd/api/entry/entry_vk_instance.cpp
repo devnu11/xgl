@@ -67,9 +67,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateInstance(
     const VkAllocationCallbacks*                pAllocator,
     VkInstance*                                 pInstance)
 {
-    VkResult result = Instance::Create(pCreateInfo, pAllocator, pInstance);
-
-    return result;
+    return Instance::Create(
+		pCreateInfo,
+		pAllocator,
+		pInstance);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyInstance(
@@ -87,8 +88,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDevices(
     uint32_t*                                   pPhysicalDeviceCount,
     VkPhysicalDevice*                           pPhysicalDevices)
 {
-    return Instance::ObjectFromHandle(instance)->EnumeratePhysicalDevices(
-        pPhysicalDeviceCount, pPhysicalDevices);
+    return Instance::ObjectFromHandle(instance)->EnumeratePhysicalDevices(pPhysicalDeviceCount, pPhysicalDevices);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(
@@ -96,8 +96,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(
     uint32_t*                                   pPhysicalDeviceGroupCount,
     VkPhysicalDeviceGroupProperties*            pPhysicalDeviceGroupProperties)
 {
-    return Instance::ObjectFromHandle(instance)->EnumeratePhysicalDeviceGroups(
-        pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
+    return Instance::ObjectFromHandle(instance)->EnumeratePhysicalDeviceGroups(pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceExtensionProperties(

@@ -73,7 +73,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkMapMemory(
 {
     Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    return Memory::ObjectFromHandle(memory)->Map(pDevice, flags, offset, size, ppData);
+    return Memory::ObjectFromHandle(memory)->Map(
+		pDevice,
+		flags,
+		offset,
+		size,
+		ppData);
 }
 
 // =====================================================================================================================

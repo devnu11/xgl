@@ -70,7 +70,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkBindBufferMemory(
 {
     const Device* pDevice = ApiDevice::ObjectFromHandle(device);
 
-    Buffer::ObjectFromHandle(buffer)->BindMemory(pDevice, memory, memoryOffset, nullptr);
+    Buffer::ObjectFromHandle(buffer)->BindMemory(
+		pDevice,
+		memory,
+		memoryOffset,
+		nullptr);
 
     return VK_SUCCESS;
 }
