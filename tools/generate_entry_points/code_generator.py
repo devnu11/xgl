@@ -87,7 +87,6 @@ class EntryPointGenerator:
     
     def _group_commands_by_object_type(self, commands: Dict[str, Command]) -> Dict[str, List[Command]]:
         """Group commands by explicit file mappings, preserving the order specified in mappings."""
-        file_mappings = self._get_file_mappings()
         enhanced_mappings = self._get_enhanced_file_mappings()
         
         groups: Dict[str, List[Command]] = {}
@@ -95,51 +94,30 @@ class EntryPointGenerator:
         missing_functions = []  # Functions in mappings but not in XML
         
         # Iterate through file mappings in order to preserve function ordering
-        for file_name, mapping_data in file_mappings.items():
+        for file_name, mapping_data in enhanced_mappings.items():
             groups[file_name] = []
-            
-            # Build a map of enhanced functions for quick lookup
-            enhanced_functions = {}
-            if file_name in enhanced_mappings:
-                for func_entry in enhanced_mappings[file_name]['functions']:
-                    enhanced_functions[func_entry['name']] = func_entry
-            
-            # Process all functions from the old format, applying enhanced metadata where available
-            func_list = mapping_data if isinstance(mapping_data, list) else mapping_data.get('functions', [])
-            for func_entry in func_list:
-                func_name = func_entry if isinstance(func_entry, str) else func_entry.get('name')
-                if func_name in commands:
-                    command = commands[func_name]
+           
+            func_list = mapping_data.get('functions')
+            for function_name, enhanced_entry in mapping_data.items():
+                if function_name in commands:
+                    command = commands[function_name]
                     
                     # Check if we have enhanced metadata for this function
-                    if func_name in enhanced_functions:
-                        enhanced_entry = enhanced_functions[func_name]
-                        command.impl_type = enhanced_entry.get('impl', 'standard')
-                        command.impl_method = enhanced_entry.get('method')
-                        command.impl_return = enhanced_entry.get('return')
-                    else:
-                        # Set default implementation type for functions without enhanced metadata
-                        command.impl_type = 'standard'
-                        command.impl_method = None
-                        command.impl_return = None
+                    command.impl_type = enhanced_entry.get('impl', 'standard')
+                    command.impl_method = enhanced_entry.get('method', None)
+                    command.impl_return = enhanced_entry.get('return', None)
                     
                     groups[file_name].append(command)
                 else:
                     # Function is in mapping but not found in XML
-                    missing_functions.append(f"{func_name} (mapped to {file_name})")
+                    missing_functions.append(f"{function_name} (mapped to {file_name})")
         
         # Check for functions in commands that aren't mapped to any file
         mapped_functions = set()
-        for file_name, mapping_data in file_mappings.items():
-            if file_name in enhanced_mappings:
-                func_list = enhanced_mappings[file_name]['functions']
-                for func_entry in func_list:
-                    mapped_functions.add(func_entry['name'])
-            else:
-                func_list = mapping_data if isinstance(mapping_data, list) else mapping_data.get('functions', [])
-                for func_entry in func_list:
-                    func_name = func_entry if isinstance(func_entry, str) else func_entry.get('name')
-                    mapped_functions.add(func_name)
+        for file_name, mapping_data in enhanced_mappings.items():
+            if file_name in mapping_data:
+                for function_name in mapping_data['functions'].keys:
+                    mapped_functions.add(function_name)
         
         for command in commands.values():
             if command.name not in mapped_functions:
@@ -163,24 +141,21 @@ class EntryPointGenerator:
     
     def _get_enhanced_file_mappings(self) -> Dict[str, Dict[str, List]]:
         """Get enhanced mapping with implementation metadata for select files."""
-        result = {}
-        for file_name in self.config.enhanced_functions:
-            result[file_name] = {
-                'functions': [
-                    {
-                        'name': override.name,
-                        'impl': override.impl if override.impl else 'standard',
-                        'method': override.method,
-                        'return': override.return_value
-                    }
-                    for override in self.config.get_enhanced_function_overrides(file_name)
-                ]
-            }
-        return result
+        # result = {}
+        # for file_name in self.config.enhanced_functions:
+        #     result[file_name] = {
+        #         'functions': [
+        #             {
+        #                 'name': override.name,
+        #                 'impl': override.impl if override.impl else 'standard',
+        #                 'method': override.method,
+        #                 'return': override.return_value
+        #             }
+        #             for override in self.config.enhanced_functions(file_name)
+        #         ]
+        #     }
+        return self.config.enhanced_functions
     
-    def _get_file_mappings(self) -> Dict[str, List[str]]:
-        """Get explicit mapping of file names to function details with implementation metadata."""  
-        return self.config.file_mappings
     
     def _find_handle_parameter_for_object_type(self, command: Command, file_object_type: str) -> Optional:
         """Find the handle parameter that matches the expected object type for this file.
