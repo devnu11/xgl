@@ -1,0 +1,503 @@
+{
+  // File Function Mappings and Enhanced Configurations
+  // Each file contains an ordered list of functions and their enhanced specifications
+  "files": {
+    // Buffer operations - basic resource management
+    "buffer": {
+      "functions": {
+        "vkDestroyBuffer": {"method": "Destroy"},
+        "vkBindBufferMemory": {"method": "BindMemory"},
+        "vkBindBufferMemory2": {},
+        "vkGetBufferMemoryRequirements": {"method": "GetMemoryRequirements"},
+        "vkGetBufferMemoryRequirements2": {"method": "GetMemoryRequirements"},
+        "vkGetBufferDeviceAddress": {"method": "GpuVirtAddr"},  // Custom XGL method name
+        "vkGetBufferOpaqueCaptureAddress": {"method": "GpuVirtAddr"},
+        "vkGetDeviceBufferMemoryRequirements": {},
+      },
+    },
+
+    "cmd_buffer": {
+      "functions": [
+        "vkDestroyCommandBuffer",
+        "vkBeginCommandBuffer",
+        "vkEndCommandBuffer", 
+        "vkResetCommandBuffer",
+        "vkCmdBindPipeline",
+        "vkCmdSetViewport",
+        "vkCmdSetScissor",
+        "vkCmdSetLineWidth",
+        "vkCmdSetDepthBias",
+        "vkCmdSetBlendConstants",
+        "vkCmdSetDepthBounds",
+        "vkCmdSetStencilCompareMask",
+        "vkCmdSetStencilWriteMask",
+        "vkCmdSetStencilReference",
+        "vkCmdBindDescriptorSets",
+        "vkCmdBindIndexBuffer",
+        "vkCmdBindVertexBuffers",
+        "vkCmdDraw",
+        "vkCmdDrawIndexed",
+        "vkCmdDrawIndirect",
+        "vkCmdDrawIndexedIndirect",
+        "vkCmdDispatch",
+        "vkCmdDispatchIndirect",
+        "vkCmdCopyBuffer",
+        "vkCmdCopyImage",
+        "vkCmdBlitImage",
+        "vkCmdCopyBufferToImage",
+        "vkCmdCopyImageToBuffer",
+        "vkCmdUpdateBuffer",
+        "vkCmdFillBuffer",
+        "vkCmdClearColorImage",
+        "vkCmdClearDepthStencilImage",
+        "vkCmdClearAttachments",
+        "vkCmdResolveImage",
+        "vkCmdSetEvent",
+        "vkCmdResetEvent",
+        "vkCmdWaitEvents",
+        "vkCmdPipelineBarrier",
+        "vkCmdBeginQuery",
+        "vkCmdEndQuery",
+        "vkCmdResetQueryPool",
+        "vkCmdWriteTimestamp",
+        "vkCmdCopyQueryPoolResults",
+        "vkCmdPushConstants",
+        "vkCmdBeginRenderPass",
+        "vkCmdNextSubpass",
+        "vkCmdEndRenderPass",
+        "vkCmdExecuteCommands",
+        "vkCmdSetDeviceMask",
+        "vkCmdDispatchBase",
+        "vkCmdDrawIndirectCount",
+        "vkCmdDrawIndexedIndirectCount",
+        "vkCmdBeginRenderPass2",
+        "vkCmdNextSubpass2",
+        "vkCmdEndRenderPass2",
+      ],
+      "enhanced": {
+        "vkBeginCommandBuffer": {"method": "Begin"},
+        "vkEndCommandBuffer": {"method": "End"},
+        "vkResetCommandBuffer": {"method": "Reset"},
+        "vkCmdDispatchBase": {"method": "DispatchOffset"},
+        "vkCmdBlitImage2": {"method": "BlitImage"},
+        "vkCmdCopyBuffer2": {"method": "CopyBuffer"},
+        "vkCmdCopyBufferToImage2": {"method": "CopyBufferToImage"},
+        "vkCmdCopyImage2": {"method": "CopyImage"},
+        "vkCmdCopyImageToBuffer2": {"method": "CopyImageToBuffer"},
+        "vkCmdResolveImage2": {"method": "ResolveImage"},
+        "vkCmdBeginRenderPass2": {"method": "BeginRenderPass"},
+        "vkCmdNextSubpass2": {"method": "NextSubpass"},
+        "vkCmdEndRenderPass2": {"method": "EndRenderPass"},
+        "vkCmdPipelineBarrier2": {"method": "PipelineBarrier"},
+        "vkCmdSetEvent2": {"method": "SetEvent"},
+        "vkCmdResetEvent2": {"method": "ResetEvent"},
+        "vkCmdWaitEvents2": {"method": "WaitEvents"},
+        "vkCmdWriteTimestamp2": {"method": "WriteTimestamp"},
+        "vkCmdWriteBufferMarker2AMD": {"method": "WriteBufferMarkerAMD"},
+        "vkCmdBindVertexBuffers2": {"method": "BindVertexBuffers"},
+      },
+    },
+
+    "cmd_pool": {
+      "functions": [
+        "vkDestroyCommandPool",
+        "vkResetCommandPool",
+        "vkTrimCommandPool",
+      ],
+      "enhanced": {
+        "vkDestroyCommandPool": {"method": "Destroy"},
+        "vkResetCommandPool": {"method": "Reset"},
+        "vkTrimCommandPool": {"method": "Trim"},
+      },
+    },
+
+    // Deferred operations for asynchronous execution
+    "deferred_operation": {
+      "functions": [
+        "vkDestroyDeferredOperationKHR",
+        "vkGetDeferredOperationResultKHR",
+        "vkGetDeferredOperationMaxConcurrencyKHR", 
+        "vkDeferredOperationJoinKHR",
+      ],
+      "enhanced": {
+        "vkDestroyDeferredOperationKHR": {"method": "Destroy"},
+        "vkGetDeferredOperationResultKHR": {"method": "GetResult"},
+        "vkGetDeferredOperationMaxConcurrencyKHR": {"method": "GetMaxConcurrency"},
+        "vkDeferredOperationJoinKHR": {"method": "Join"},  // The function that started this whole migration!
+      },
+    },
+
+    "descriptor_pool": {
+      "functions": [
+        "vkDestroyDescriptorPool",
+        "vkResetDescriptorPool",
+      ],
+      "enhanced": {
+        "vkDestroyDescriptorPool": {"method": "Destroy"},
+        "vkResetDescriptorPool": {"method": "Reset"},
+      },
+    },
+
+    "descriptor_set": {
+      "functions": [
+        "vkFreeDescriptorSets",
+        "vkUpdateDescriptorSets",
+        "vkUpdateDescriptorSetWithTemplate",
+        "vkUpdateDescriptorSetWithTemplateKHR",
+      ],
+      "enhanced": {
+        "vkFreeDescriptorSets": {"method": "Free"},
+        "vkUpdateDescriptorSets": {"impl": "success_only", "return": "VK_SUCCESS"},
+        "vkUpdateDescriptorSetWithTemplate": {"method": "Update"},
+        "vkUpdateDescriptorSetWithTemplateKHR": {"method": "Update"},
+      },
+    },
+
+    "descriptor_set_layout": {
+      "functions": [
+        "vkDestroyDescriptorSetLayout",
+        "vkGetDescriptorSetLayoutSupport",
+        "vkGetDescriptorSetLayoutSupportKHR",
+      ],
+      "enhanced": {
+        "vkDestroyDescriptorSetLayout": {"method": "Destroy"},
+        "vkGetDescriptorSetLayoutSupport": {"method": "GetLayoutSupport"},
+        "vkGetDescriptorSetLayoutSupportKHR": {"method": "GetLayoutSupport"},
+      },
+    },
+
+    // Core device operations
+    "device": {
+      "functions": [
+        "vkDestroyDevice",
+        "vkGetDeviceQueue",
+        "vkDeviceWaitIdle",
+        "vkAllocateMemory",
+        "vkAllocateCommandBuffers",
+        "vkAllocateDescriptorSets",
+        "vkCreateBuffer",
+        "vkCreateImage",
+        "vkCreateImageView",
+        "vkCreateShaderModule",
+        "vkCreatePipelineLayout",
+        "vkCreateRenderPass",
+        "vkCreateGraphicsPipelines",
+        "vkCreateComputePipelines",
+        "vkCreateFramebuffer",
+        "vkCreateCommandPool",
+        "vkCreateSemaphore",
+        "vkCreateFence",
+        "vkCreateEvent",
+        "vkCreateQueryPool",
+        "vkCreateBufferView",
+        "vkCreateDescriptorSetLayout",
+        "vkCreateDescriptorPool",
+        "vkCreateSampler",
+        "vkGetDeviceMemoryCommitment",
+        "vkGetDeviceQueue2",
+        "vkCreateSamplerYcbcrConversion",
+        "vkDestroySamplerYcbcrConversion",
+        "vkCreateDescriptorUpdateTemplate",
+        "vkDestroyDescriptorUpdateTemplate",
+        "vkGetDeviceGroupPeerMemoryFeatures",
+        "vkBindBufferMemory2",
+        "vkBindImageMemory2",
+        "vkGetDeviceMemoryOpaqueCaptureAddress",
+        "vkGetBufferDeviceAddress",
+        "vkGetBufferOpaqueCaptureAddress",
+        "vkEnumerateDeviceLayerProperties",
+      ],
+      "enhanced": {
+        "vkEnumerateDeviceLayerProperties": {"impl": "success_only", "return": "VK_SUCCESS"},  // Stub - no layers to enumerate
+      },
+    },
+
+    "fence": {
+      "functions": [
+        "vkDestroyFence",
+        "vkResetFences",
+        "vkGetFenceStatus",
+        "vkWaitForFences",
+      ],
+      "enhanced": {
+        "vkDestroyFence": {"method": "Destroy"},
+        "vkResetFences": {"impl": "success_only", "return": "VK_SUCCESS"},
+        "vkGetFenceStatus": {"method": "GetStatus"},
+        "vkWaitForFences": {"impl": "success_only", "return": "VK_SUCCESS"},
+      },
+    },
+
+    "framebuffer": {
+      "functions": [
+        "vkDestroyFramebuffer",
+      ],
+      "enhanced": {
+        "vkDestroyFramebuffer": {"method": "Destroy"},
+      },
+    },
+
+    "image": {
+      "functions": [
+        "vkDestroyImage",
+        "vkGetImageMemoryRequirements",
+        "vkGetImageMemoryRequirements2",
+        "vkGetImageSparseMemoryRequirements",
+        "vkGetImageSparseMemoryRequirements2",
+        "vkBindImageMemory",
+        "vkBindImageMemory2",
+        "vkGetImageSubresourceLayout",
+      ],
+      "enhanced": {
+        "vkDestroyImage": {"method": "Destroy"},
+        "vkGetImageMemoryRequirements": {"method": "GetMemoryRequirements"},
+        "vkGetImageMemoryRequirements2": {"method": "GetMemoryRequirements"},
+        "vkGetImageSparseMemoryRequirements": {"method": "GetSparseMemoryRequirements"},
+        "vkGetImageSparseMemoryRequirements2": {"method": "GetSparseMemoryRequirements"},
+        "vkBindImageMemory": {"method": "BindMemory"},
+        "vkGetImageSubresourceLayout": {"method": "GetSubresourceLayout"},
+      },
+    },
+
+    "image_view": {
+      "functions": [
+        "vkDestroyImageView",
+      ],
+      "enhanced": {
+        "vkDestroyImageView": {"method": "Destroy"},
+      },
+    },
+
+    "instance": {
+      "functions": [
+        "vkDestroyInstance",
+        "vkEnumeratePhysicalDevices",
+        "vkEnumerateInstanceExtensionProperties",
+        "vkEnumerateInstanceLayerProperties",
+        "vkEnumerateInstanceVersion",
+      ],
+      "enhanced": {
+        "vkDestroyInstance": {"method": "Destroy"},
+        "vkEnumeratePhysicalDevices": {"method": "EnumeratePhysicalDevices"},
+        "vkEnumerateInstanceExtensionProperties": {"impl": "success_only", "return": "VK_SUCCESS"},
+        "vkEnumerateInstanceLayerProperties": {"impl": "success_only", "return": "VK_SUCCESS"},
+        "vkEnumerateInstanceVersion": {"impl": "success_only", "return": "VK_SUCCESS"},
+      },
+    },
+
+    // Memory management operations
+    "memory": {
+      "functions": [
+        "vkFreeMemory",
+        "vkMapMemory",
+        "vkUnmapMemory",
+        "vkMapMemory2",
+        "vkUnmapMemory2",
+        "vkFlushMappedMemoryRanges",
+        "vkInvalidateMappedMemoryRanges",
+        "vkGetDeviceMemoryCommitment",
+        "vkGetMemoryFdKHR",
+        "vkGetMemoryFdPropertiesKHR",
+        "vkGetDeviceMemoryOpaqueCaptureAddress",
+      ],
+      "enhanced": {
+        "vkFreeMemory": {"method": "Free"},
+        "vkMapMemory": {"method": "Map"},
+        "vkUnmapMemory": {"method": "Unmap"},
+        "vkMapMemory2": {"method": "Map"},
+        "vkUnmapMemory2": {"method": "Unmap"},
+        "vkFlushMappedMemoryRanges": {"impl": "success_only", "return": "VK_SUCCESS"},  // No-op for XGL
+        "vkInvalidateMappedMemoryRanges": {"impl": "success_only", "return": "VK_SUCCESS"},  // No-op for XGL
+        "vkGetDeviceMemoryCommitment": {"method": "GetCommitment"},
+        "vkGetMemoryFdKHR": {"method": "GetMemoryFd"},
+        "vkGetMemoryFdPropertiesKHR": {"impl": "success_only", "return": "VK_SUCCESS"},  // Platform support stub
+        "vkGetDeviceMemoryOpaqueCaptureAddress": {"method": "GetOpaqueCaptureAddress"},
+      },
+    },
+
+    "physical_device": {
+      "functions": [
+        "vkCreateDevice",
+        "vkEnumerateDeviceExtensionProperties",
+        "vkGetPhysicalDeviceFeatures",
+        "vkGetPhysicalDeviceProperties",
+        "vkGetPhysicalDeviceImageFormatProperties",
+        "vkGetPhysicalDeviceFormatProperties",
+        "vkEnumerateDeviceLayerProperties",
+        "vkGetPhysicalDeviceMemoryProperties",
+        "vkGetPhysicalDeviceQueueFamilyProperties",
+        "vkGetPhysicalDeviceSparseImageFormatProperties",
+        "vkGetPhysicalDeviceSurfaceSupportKHR",
+        "vkGetPhysicalDeviceSurfacePresentModesKHR",
+        "vkGetPhysicalDeviceSurfaceCapabilitiesKHR",
+        "vkGetPhysicalDeviceSurfaceCapabilities2KHR",
+        "vkGetPhysicalDeviceSurfaceFormatsKHR",
+        "vkGetPhysicalDeviceSurfaceFormats2KHR",
+        "vkGetPhysicalDeviceFeatures2",
+        "vkGetPhysicalDeviceProperties2",
+        "vkGetPhysicalDeviceFormatProperties2",
+        "vkGetPhysicalDeviceImageFormatProperties2",
+        "vkGetPhysicalDeviceMultisamplePropertiesEXT",
+        "vkGetPhysicalDeviceQueueFamilyProperties2",
+        "vkGetPhysicalDeviceMemoryProperties2",
+        "vkGetPhysicalDeviceSparseImageFormatProperties2",
+        "vkGetPhysicalDeviceExternalBufferProperties",
+        "vkGetPhysicalDeviceExternalSemaphoreProperties",
+        "vkGetPhysicalDeviceExternalFenceProperties",
+        "vkGetPhysicalDeviceXcbPresentationSupportKHR",
+        "vkGetPhysicalDeviceXlibPresentationSupportKHR",
+        "vkGetPhysicalDeviceWaylandPresentationSupportKHR",
+        "vkAcquireXlibDisplayEXT",
+        "vkGetRandROutputDisplayEXT",
+        "vkReleaseDisplayEXT",
+        "vkGetPhysicalDevicePresentRectanglesKHR",
+        "vkGetPhysicalDeviceDisplayPropertiesKHR",
+        "vkGetPhysicalDeviceDisplayPlanePropertiesKHR",
+        "vkGetDisplayPlaneSupportedDisplaysKHR",
+        "vkGetDisplayModePropertiesKHR",
+        "vkCreateDisplayModeKHR",
+        "vkGetDisplayPlaneCapabilitiesKHR",
+        "vkGetPhysicalDeviceDisplayProperties2KHR",
+        "vkGetPhysicalDeviceDisplayPlaneProperties2KHR",
+        "vkGetDisplayModeProperties2KHR",
+        "vkGetDisplayPlaneCapabilities2KHR",
+        "vkGetPhysicalDeviceSurfaceCapabilities2EXT",
+        "vkGetPhysicalDeviceToolProperties",
+        "vkGetPhysicalDeviceFragmentShadingRatesKHR",
+        "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR",
+      ],
+      "enhanced": {
+        "vkGetPhysicalDeviceProperties2": {"method": "GetDeviceProperties2"},
+        "vkGetPhysicalDeviceMultisamplePropertiesEXT": {"method": "GetDeviceMultisampleProperties"},
+        "vkGetPhysicalDeviceQueueFamilyProperties2": {"method": "GetQueueFamilyProperties"},
+        "vkAcquireXlibDisplayEXT": {"method": "AcquireXlibDisplay"},
+        "vkGetRandROutputDisplayEXT": {"method": "GetRandROutputDisplay"},
+        "vkReleaseDisplayEXT": {"method": "ReleaseDisplay"},
+        "vkGetPhysicalDevicePresentRectanglesKHR": {"method": "GetPhysicalDevicePresentRectangles"},
+        "vkGetDisplayPlaneSupportedDisplaysKHR": {"method": "GetDisplayPlaneSupportedDisplays"},
+        "vkGetDisplayModePropertiesKHR": {"method": "GetDisplayModeProperties"},
+        "vkCreateDisplayModeKHR": {"method": "CreateDisplayMode"},
+        "vkGetDisplayPlaneCapabilitiesKHR": {"method": "GetDisplayPlaneCapabilities"},
+        "vkGetPhysicalDeviceDisplayProperties2KHR": {"method": "GetDisplayProperties"},
+        "vkGetPhysicalDeviceDisplayPlaneProperties2KHR": {"method": "GetDisplayPlaneProperties"},
+        "vkGetDisplayPlaneCapabilities2KHR": {"method": "GetDisplayPlaneCapabilities"},
+        "vkGetPhysicalDeviceToolProperties": {"method": "GetPhysicalDeviceToolPropertiesEXT"},
+        "vkGetPhysicalDeviceFragmentShadingRatesKHR": {"method": "GetFragmentShadingRates"},
+        "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR": {"method": "GetPhysicalDeviceCooperativeMatrixPropertiesKHR"},
+        "vkGetPhysicalDeviceSurfacePresentModesKHR": {"method": "GetSurfacePresentModes"},
+        "vkGetPhysicalDeviceProperties": {"method": "GetDeviceProperties"},
+        "vkEnumerateDeviceExtensionProperties": {"method": "EnumerateExtensionProperties"},
+      },
+    },
+
+    "pipeline": {
+      "functions": [
+        "vkDestroyPipeline",
+        "vkGetRayTracingShaderGroupHandlesKHR",
+        "vkGetRayTracingCaptureReplayShaderGroupHandlesKHR",
+        "vkCompileDeferredNV",
+        "vkCreateRayTracingPipelinesNV",
+        "vkCreateRayTracingPipelinesKHR",
+        "vkGetRayTracingShaderGroupStackSizeKHR",
+      ],
+      "enhanced": {
+        "vkDestroyPipeline": {"method": "Destroy"},
+        "vkGetRayTracingShaderGroupHandlesKHR": {"method": "GetRayTracingShaderGroupHandles"},
+        "vkGetRayTracingCaptureReplayShaderGroupHandlesKHR": {"method": "GetRayTracingCaptureReplayShaderGroupHandles"},
+        "vkCompileDeferredNV": {"method": "CompileDeferred"},
+        "vkCreateRayTracingPipelinesNV": {"impl": "success_only", "return": "VK_SUCCESS"},
+        "vkCreateRayTracingPipelinesKHR": {"impl": "success_only", "return": "VK_SUCCESS"},
+        "vkGetRayTracingShaderGroupStackSizeKHR": {"method": "GetRayTracingShaderGroupStackSize"},
+      },
+    },
+
+    "pipeline_layout": {
+      "functions": [
+        "vkDestroyPipelineLayout",
+      ],
+      "enhanced": {
+        "vkDestroyPipelineLayout": {"method": "Destroy"},
+      },
+    },
+
+    "query_pool": {
+      "functions": [
+        "vkDestroyQueryPool",
+        "vkGetQueryPoolResults",
+      ],
+      "enhanced": {
+        "vkDestroyQueryPool": {"method": "Destroy"},
+        "vkGetQueryPoolResults": {"method": "GetResults"},
+      },
+    },
+
+    "queue": {
+      "functions": [
+        "vkQueueSubmit",
+        "vkQueueWaitIdle",
+        "vkQueueBindSparse",
+        "vkQueuePresentKHR",
+        "vkQueueSubmit2",
+      ],
+      "enhanced": {
+        "vkQueueSubmit": {"method": "Submit"},
+        "vkQueueWaitIdle": {"method": "WaitIdle"},
+        "vkQueueBindSparse": {"method": "BindSparse"},
+        "vkQueuePresentKHR": {"method": "Present"},
+        "vkQueueSubmit2": {"method": "Submit"},
+      },
+    },
+
+    "render_pass": {
+      "functions": [
+        "vkDestroyRenderPass",
+        "vkGetRenderAreaGranularity",
+      ],
+      "enhanced": {
+        "vkDestroyRenderPass": {"method": "Destroy"},
+        "vkGetRenderAreaGranularity": {"method": "GetRenderAreaGranularity"},
+      },
+    },
+
+    "sampler": {
+      "functions": [
+        "vkDestroySampler",
+      ],
+      "enhanced": {
+        "vkDestroySampler": {"method": "Destroy"},
+      },
+    },
+
+    "semaphore": {
+      "functions": [
+        "vkDestroySemaphore",
+        "vkGetSemaphoreCounterValue",
+        "vkWaitSemaphores",
+        "vkSignalSemaphore",
+      ],
+      "enhanced": {
+        "vkDestroySemaphore": {"method": "Destroy"},
+        "vkGetSemaphoreCounterValue": {"method": "GetCounterValue"},
+        "vkWaitSemaphores": {"impl": "success_only", "return": "VK_SUCCESS"},
+        "vkSignalSemaphore": {"impl": "success_only", "return": "VK_SUCCESS"},
+      },
+    },
+
+    "shader_module": {
+      "functions": [
+        "vkDestroyShaderModule",
+      ],
+      "enhanced": {
+        "vkDestroyShaderModule": {"method": "Destroy"},
+      },
+    },
+
+    "surface": {
+      "functions": [
+        "vkDestroySurfaceKHR",
+      ],
+      "enhanced": {
+        "vkDestroySurfaceKHR": {"method": "Destroy"},
+      },
+    },
+  },
+}

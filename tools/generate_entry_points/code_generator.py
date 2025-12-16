@@ -97,15 +97,17 @@ class EntryPointGenerator:
         for file_name, mapping_data in enhanced_mappings.items():
             groups[file_name] = []
            
-            func_list = mapping_data.get('functions')
-            for function_name, enhanced_entry in mapping_data.items():
+            # In the JSON5 structure, functions is a dictionary {func_name: config}
+            functions_dict = mapping_data.get('functions', {})
+            
+            for function_name, func_config in functions_dict.items():
                 if function_name in commands:
                     command = commands[function_name]
                     
-                    # Check if we have enhanced metadata for this function
-                    command.impl_type = enhanced_entry.get('impl', 'standard')
-                    command.impl_method = enhanced_entry.get('method', None)
-                    command.impl_return = enhanced_entry.get('return', None)
+                    # Apply enhanced metadata directly from JSON5
+                    command.impl_type = func_config.get('impl', 'standard')
+                    command.impl_method = func_config.get('method')
+                    command.impl_return = func_config.get('return')
                     
                     groups[file_name].append(command)
                 else:
@@ -115,9 +117,9 @@ class EntryPointGenerator:
         # Check for functions in commands that aren't mapped to any file
         mapped_functions = set()
         for file_name, mapping_data in enhanced_mappings.items():
-            if file_name in mapping_data:
-                for function_name in mapping_data['functions'].keys:
-                    mapped_functions.add(function_name)
+            functions_dict = mapping_data.get('functions', {})
+            for function_name in functions_dict.keys():
+                mapped_functions.add(function_name)
         
         for command in commands.values():
             if command.name not in mapped_functions:
@@ -141,20 +143,17 @@ class EntryPointGenerator:
     
     def _get_enhanced_file_mappings(self) -> Dict[str, Dict[str, List]]:
         """Get enhanced mapping with implementation metadata for select files."""
-        # result = {}
-        # for file_name in self.config.enhanced_functions:
-        #     result[file_name] = {
-        #         'functions': [
-        #             {
-        #                 'name': override.name,
-        #                 'impl': override.impl if override.impl else 'standard',
-        #                 'method': override.method,
-        #                 'return': override.return_value
-        #             }
-        #             for override in self.config.enhanced_functions(file_name)
-        #         ]
-        #     }
-        return self.config.enhanced_functions
+        # Return the raw JSON5 structure - functions are already organized by file
+        result = {}
+        
+        # Access the raw JSON5 data directly
+        import json5
+        from pathlib import Path
+        config_file = Path(__file__).parent / "config" / "function_overrides.json5"
+        with open(config_file, 'r') as f:
+            data = json5.load(f)
+        
+        return data["files"]
     
     
     def _find_handle_parameter_for_object_type(self, command: Command, file_object_type: str) -> Optional:

@@ -62,14 +62,27 @@ class ConfigLoader:
             data = json5.load(f)
         
         # Load merged files structure
-        self.enhanced_functions: Dict[str, Dict[str, FunctionOverride]] = {}
+        self.enhanced_functions: Dict[str, List[FunctionOverride]] = {}
+        self.file_mappings: Dict[str, List[str]] = {}
         
-        for file_name, file_config in data["files"].items():         
-            class_functions = file_config.get("functions", {})
-            self.enhanced_functions[file_name] = class_functions
-            for func_name, func_config in class_functions.items():
-                func_config['name'] = func_name
-                func_config['return_value'] = func_config.get('return', None)
+        for file_name, file_config in data["files"].items():
+            # Extract function list (preserving order) - functions is now a dict
+            functions_dict = file_config["functions"]
+            self.file_mappings[file_name] = list(functions_dict.keys())
+            
+            # Extract enhanced function specifications
+            self.enhanced_functions[file_name] = []
+            
+            for func_name, func_config in functions_dict.items():
+                # Only create override if there are actual specifications
+                if func_config:  # Skip empty dicts
+                    override = FunctionOverride(
+                        name=func_name,
+                        method=func_config.get("method"),
+                        impl=func_config.get("impl"),
+                        return_value=func_config.get("return")
+                    )
+                    self.enhanced_functions[file_name].append(override)
             
     
     # Methods to replace scattered mappings throughout the codebase
@@ -159,3 +172,7 @@ class ConfigLoader:
     def get_enhanced_function_overrides(self, file_name: str) -> List[FunctionOverride]:
         """Get enhanced function overrides for a file."""
         return self.enhanced_functions.get(file_name, [])
+    
+    def get_file_function_list(self, file_name: str) -> List[str]:
+        """Get list of functions mapped to a file."""
+        return self.file_mappings.get(file_name, [])
